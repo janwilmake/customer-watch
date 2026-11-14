@@ -20,3 +20,5 @@ jobs:
           python note.py demo
           python nextstep.py acme-staffing > /dev/null
           python trust.py --days 30
+          python report.py daily
+          python report.py weekly

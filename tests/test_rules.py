@@ -107,5 +107,24 @@ class Note(unittest.TestCase):
         self.assertIn("Drafts ready:", text)
 
 
+
+class Report(unittest.TestCase):
+    def setUp(self):
+        import report
+        self.report = report
+
+    def test_the_daily_report_lists_the_late_items_and_the_call(self):
+        text = self.report.daily()
+        self.assertIn("3 late at 1 customer", text)
+        self.assertIn("Pieter Jansen (Acme Staffing)", text)
+
+    def test_the_team_report_names_no_person_and_no_phone_number(self):
+        text = self.report.weekly()
+        self.assertIn("**Acme Staffing**", text)
+        for private in ("Sanne", "Pieter", "Mo Amrani", "Lisa", "+31", "Robin:"):
+            self.assertNotIn(private, text)
+        self.assertLess(len(text), 5000)  # one Slack message
+
+
 if __name__ == "__main__":
     unittest.main()

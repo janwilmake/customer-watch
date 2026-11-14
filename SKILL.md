@@ -365,6 +365,22 @@ When the user hands an open conversation, promise or wish to this session ("send
 - After `until` the item counts as before, so work that stopped shows up again as Late. Move
   `until` only when the user agrees to more time.
 
+## Reports
+
+`report.py` reads every ledger at once, with no model. Run it on request, or on a schedule in
+one session that the user picks for it.
+
+- `report.py daily`: for the user. What is late, the calls to make with phone numbers, drafts not
+  sent, meetings in the next 36 hours, and customers whose watch looks stale or has no session.
+- `report.py weekly`: for the team. Status per customer, the most-asked open wishes across all
+  customers, what shipped and whether the reporter was told, who needs attention, and the user's
+  trust count. Company names and counts only: no person names, phone numbers or message text, so it
+  can go to a team channel. Under 5,000 characters, one chat message.
+- `report.py roost <session-id>`: the daily overview as that session's note, with the Late badge.
+
+The session that runs a report sends it where the user said (for example a DM to themselves, or a
+team channel), as the user's own standing order. It sends the report and nothing else.
+
 ## Status
 
 Show per customer: the note (`python3 note.py <session-id>`), the gate pid
