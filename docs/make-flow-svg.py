@@ -1,24 +1,26 @@
 #!/usr/bin/env python3
-"""Renders docs/flow.svg: message in, your software factory, message out. An animated SVG (SMIL).
+"""Renders docs/flow.svg: a triangle with the customer on top and your software factory as its base.
 
-The customer sits on the bottom edge. One loop of 10 s: their message comes in (customer-watch
-reads it), the wish goes through the factory (ticket, PR, production), and the message goes out
-(customer-watch drafts "it's live"), back to the customer.
+"Message in" sits halfway down the left side, "message out" halfway up the right side: both are
+customer-watch. One loop of 10 s: the customer's message comes in, the wish goes through the factory
+(ticket, PR, production), and "it's live" goes back up to the customer. An animated SVG (SMIL).
 Run: python3 docs/make-flow-svg.py
 """
 import math
 import os
 
-W, H = 1200, 820
+W, H = 1200, 840
 DUR = "10s"
 GREEN, BLUE, VIOLET, INK = "#4fd18b", "#5fa8ff", "#a78bfa", "#16161d"
 FONT = "system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif"
 
-CUST, MIN, MOUT = (600, 560), (240, 560), (960, 560)
-FAC = (380, 120, 820, 284)          # the factory box: x0, y0, x1, y1
-BELT_Y = 224
+CUST = (600, 128)
+FAC = (300, 520, 900, 708)          # the factory box, the base of the triangle: x0, y0, x1, y1
+BELT_Y = 632
 ENTER, EXIT = (FAC[0], BELT_Y), (FAC[2], BELT_Y)
-STATIONS = [(480, "Ticket", "ticket"), (600, "PR", "merge"), (720, "Production", "bolt")]
+MIN = ((CUST[0] + ENTER[0]) / 2, (CUST[1] + ENTER[1]) / 2)    # halfway down the left side
+MOUT = ((CUST[0] + EXIT[0]) / 2, (CUST[1] + EXIT[1]) / 2)     # halfway up the right side
+STATIONS = [(440, "Ticket", "ticket"), (600, "PR", "merge"), (760, "Production", "bolt")]
 
 
 def dist(a, b):
@@ -62,14 +64,16 @@ def edge(a, b, c1, c2, gid):
             f'stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>')
 
 
-def node(at, r, color, kind, title, sub, glow):
+def node(at, r, color, kind, title, sub, glow, side):
+    """A station; its label sits to the left or the right of it, away from the triangle."""
     x, y = at
+    lx, anchor = (x - r - 26, "end") if side == "left" else (x + r + 26, "start")
     out = [f'<g transform="translate({x},{y})">',
            f'<circle r="{r + 8}" fill="{color}" opacity="0" filter="url(#glow)">{glow}</circle>',
            f'<circle r="{r}" fill="#191924" stroke="{color}" stroke-width="3"/>', icon(kind, color), "</g>",
-           f'<text x="{x}" y="{y + r + 36}" font-size="22" font-weight="800" fill="#ffffff" text-anchor="middle">{title}</text>']
+           f'<text x="{lx}" y="{y + (0 if sub else 8)}" font-size="24" font-weight="800" fill="#ffffff" text-anchor="{anchor}">{title}</text>']
     if sub:
-        out.append(f'<text x="{x}" y="{y + r + 62}" font-size="16" fill="{color}" text-anchor="middle">{sub}</text>')
+        out.append(f'<text x="{lx}" y="{y + 28}" font-size="17" fill="{color}" text-anchor="{anchor}">{sub}</text>')
     return "".join(out)
 
 
@@ -110,9 +114,9 @@ def main():
         o.append(f'<text x="{x}" y="{BELT_Y + 48}" font-size="13" font-weight="700" fill="#c9c3e6" text-anchor="middle">{name}</text>')
 
     # The corners and the customer.
-    o.append(node(MIN, 64, BLUE, "in", "message in", "customer-watch reads it", window(0.12, 0.19)))
-    o.append(node(MOUT, 64, BLUE, "out", "message out", "customer-watch drafts it", window(0.72, 0.79)))
-    o.append(node(CUST, 50, GREEN, "person", "your customer", None, window(0.88, 0.98)))
+    o.append(node(MIN, 58, BLUE, "in", "message in", "customer-watch reads it", window(0.12, 0.19), "left"))
+    o.append(node(MOUT, 58, BLUE, "out", "message out", "customer-watch drafts it", window(0.72, 0.79), "right"))
+    o.append(node(CUST, 54, GREEN, "person", "your customer", None, window(0.88, 0.98), "right"))
     o.append(f'<g transform="translate({CUST[0]},{CUST[1]})"><circle r="58" fill="{GREEN}" opacity="0" filter="url(#glow)">'
              f'{window(0.0, 0.05)}</circle></g>')
 
@@ -134,7 +138,7 @@ def main():
     for (on, off), text, color in [((0.0, 0.29), "1 · a customer writes, calls or meets you", BLUE),
                                     ((0.29, 0.63), "2 · your software factory builds it", VIOLET),
                                     ((0.63, 1.0), "3 · they hear it’s live, the same day", GREEN)]:
-        o.append(f'<text x="{W / 2}" y="752" font-size="26" font-weight="800" fill="{color}" text-anchor="middle" opacity="0">'
+        o.append(f'<text x="{W / 2}" y="780" font-size="26" font-weight="800" fill="{color}" text-anchor="middle" opacity="0">'
                  f'{text}{window(on + 0.005, off - 0.005)}</text>')
     o.append(f'<text x="{W - 32}" y="{H - 22}" font-size="13" fill="#6a6a7a" text-anchor="end">github.com/janwilmake/customer-watch</text>')
     o.append("</svg>")
