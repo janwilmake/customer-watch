@@ -1,0 +1,9 @@
+{
+ "timezone": "Europe/Amsterdam",
+ "roost_url": null,
+ "adapter": null,
+ "slack": null,
+ "intercom": null,
+ "roster_about": "About: {n} customers without a session of their own.",
+ "late_after_working_hours": 24
+}

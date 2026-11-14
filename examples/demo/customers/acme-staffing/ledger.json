@@ -1,0 +1,221 @@
+{
+ "customer": {
+  "name": "Acme Staffing",
+  "aliases": [
+   "Acme"
+  ],
+  "domains": [
+   "acme-staffing.example"
+  ],
+  "org_id": "org_acme",
+  "owners": [
+   "Alex (product)",
+   "Robin (commercial)"
+  ],
+  "slack_channels": [],
+  "contacts": [
+   {
+    "name": "Sanne de Vries",
+    "role": "champion",
+    "emails": [
+     "sanne@acme-staffing.example"
+    ],
+    "phones": [
+     "+31 6 1111 1111"
+    ],
+    "trust": {
+     "linkedin_connected": true,
+     "knows_me": "by name",
+     "next_move": null
+    }
+   },
+   {
+    "name": "Pieter Jansen",
+    "role": "decision maker (owner)",
+    "emails": [
+     "pieter@acme-staffing.example"
+    ],
+    "phones": [
+     "+31 6 2222 2222"
+    ],
+    "trust": {
+     "linkedin_connected": null,
+     "knows_me": "no",
+     "next_move": null
+    }
+   },
+   {
+    "name": "Mo Amrani",
+    "role": "user",
+    "emails": [
+     "mo@acme-staffing.example"
+    ],
+    "phones": []
+   }
+  ]
+ },
+ "conversations": [
+  {
+   "id": "c1",
+   "channel": "email",
+   "link": "https://example.ai/conversations/email/c1",
+   "subject": "Export to the ATS drops the phone number",
+   "todo": "Answer Mo: why the export drops the phone number, and when it is fixed",
+   "ball": "us",
+   "waiting_since": "2026-11-10T09:00:00Z",
+   "status": "open",
+   "their_person": "Mo Amrani",
+   "our_person": "Alex"
+  },
+  {
+   "id": "c2",
+   "channel": "email",
+   "link": "https://example.ai/conversations/email/c2",
+   "subject": "Price for 5 more seats",
+   "todo": "Pieter has the quote for 5 more seats",
+   "ball": "them",
+   "waiting_since": "2026-11-03T10:00:00Z",
+   "status": "open",
+   "their_person": "Pieter Jansen",
+   "our_person": "Robin"
+  },
+  {
+   "id": "c3",
+   "channel": "intercom",
+   "link": "https://example.ai/conversations/intercom/c3",
+   "subject": "New invoice address",
+   "todo": "Change the invoice address",
+   "ball": "us",
+   "waiting_since": "2026-11-12T08:00:00Z",
+   "status": "open",
+   "their_person": "Sanne de Vries",
+   "our_person": "Alex",
+   "delegated": {
+    "to": "Robin",
+    "slack_user": "U000ROBIN",
+    "via": {
+     "channel": "D000",
+     "ts": "1794470400.000100"
+    },
+    "since": "2026-11-12T09:00:00Z",
+    "ask": "change the invoice address in billing",
+    "back_after_working_days": 2
+   }
+  }
+ ],
+ "promises": [
+  {
+   "what": "Send the onboarding checklist for the three new recruiters",
+   "due": "2026-11-16T12:00:00Z",
+   "our_person": "Alex",
+   "source": "https://example.ai/conversations/meeting/m1",
+   "status": "open",
+   "their_person": "Sanne de Vries"
+  }
+ ],
+ "wishes": [
+  {
+   "name": "bulk-move-candidates",
+   "kind": "feature",
+   "words": "I want to move 40 candidates to the next stage at once",
+   "date": "2026-10-28",
+   "priority": "must-have",
+   "customer": "acme-staffing",
+   "source": "https://example.ai/conversations/meeting/m0",
+   "status": "shipped",
+   "reporter": "Sanne de Vries",
+   "shipped_at": "2026-11-11T10:00:00Z"
+  },
+  {
+   "name": "inmail-templates",
+   "kind": "feature",
+   "words": "Can the agent use our own InMail templates?",
+   "date": "2026-10-20",
+   "priority": "must-have",
+   "customer": "acme-staffing",
+   "source": "https://example.ai/conversations/email/c0",
+   "status": "open"
+  }
+ ],
+ "meetings": {
+  "last": {
+   "who": "Alex with Sanne (Acme)",
+   "at": "2026-11-05T13:00:00Z"
+  },
+  "next": {
+   "who": "Alex with Sanne and Pieter (Acme)",
+   "at": "2026-11-13T09:00:00Z",
+   "prep": {
+    "opener": "Ask how the three new recruiters are settling in",
+    "ask": "coffee at our office, with Pieter"
+   }
+  }
+ },
+ "last_contact_at": "2026-11-12T08:00:00Z",
+ "last_message": {
+  "who": "Sanne (Acme) → Alex",
+  "at": "2026-11-12T08:00:00Z",
+  "channel": "intercom"
+ },
+ "usage": {
+  "at": "2026-11-12T06:00:00Z",
+  "active_users_14d": 6,
+  "active_users_prev_14d": 7,
+  "notes": ""
+ },
+ "standing": {
+  "trust": {
+   "answer": "Sanne knows me by name, Pieter has never spoken to me.",
+   "evidence": [],
+   "updated": "2026-11-12"
+  }
+ },
+ "trust_log": [
+  {
+   "at": "2026-10-28T14:00:00Z",
+   "contact": "Sanne de Vries",
+   "kind": "touch",
+   "how": "email"
+  },
+  {
+   "at": "2026-11-05T13:00:00Z",
+   "contact": "Sanne de Vries",
+   "kind": "call",
+   "how": "phone"
+  },
+  {
+   "at": "2026-10-01T09:00:00Z",
+   "contact": "Pieter Jansen",
+   "kind": "touch",
+   "how": "email"
+  }
+ ],
+ "drafts": [
+  {
+   "at": "2026-11-12T14:30:00Z",
+   "channel": "email",
+   "contact": "Sanne de Vries",
+   "link": "https://example.ai/drafts/d1",
+   "conversation": "https://example.ai/conversations/meeting/m0",
+   "step": "tell them yourself that bulk-move-candidates is live",
+   "ask": null,
+   "status": "open"
+  }
+ ],
+ "calls_to_make": [
+  {
+   "contact": "Pieter Jansen",
+   "phone": "+31 6 2222 2222",
+   "why": "the quote for 5 seats has had no answer for 7 working days",
+   "notes": [
+    "Goal: hear what holds the 5 seats back",
+    "Quote sent 3 Nov; Robin owns the deal, so tell him after",
+    "Fact: 6 of 7 users active this fortnight",
+    "Ask: coffee with Sanne at our office. Promise no discount"
+   ],
+   "proposed_at": "2026-11-12T13:00:00Z",
+   "status": "open"
+  }
+ ],
+ "changed": "bulk-move-candidates went live on Wed 11 Nov; Sanne asked for it on 28 Oct"
+}

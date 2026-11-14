@@ -1,0 +1,16 @@
+{
+ "name": "Alex Example",
+ "first_name": "Alex",
+ "role": "Forward Deployed Engineer at Example AI",
+ "emails": [
+  "alex@example.ai"
+ ],
+ "office": "Example Street 1, Amsterdam",
+ "booking_link": "https://cal.com/alex-example/15min",
+ "touch_every_days": 21,
+ "ask_every_days": 28,
+ "trust_roles": [
+  "champion",
+  "decision maker"
+ ]
+}

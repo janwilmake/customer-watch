@@ -1,0 +1,6 @@
+__pycache__/
+.DS_Store
+examples/demo/sessions/*/note.md
+examples/demo/sessions/*/state.json
+examples/demo/sessions/*/gate.pid
+examples/demo/cache/

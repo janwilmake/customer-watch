@@ -1,0 +1,22 @@
+{
+ "name": "Alex Example",
+ "first_name": "Alex",
+ "role": "Forward Deployed Engineer at Acme",
+ "emails": [
+  "alex@acme.example"
+ ],
+ "slack_user": "U0123456789",
+ "linkedin": "https://www.linkedin.com/in/alex-example",
+ "phone": "+31 6 0000 0000",
+ "booking_link": "https://cal.com/alex-example/30min",
+ "languages": [
+  "en"
+ ],
+ "touch_every_days": 21,
+ "trust_roles": [
+  "champion",
+  "decision maker"
+ ],
+ "office": "Example Street 1, Amsterdam",
+ "ask_every_days": 28
+}

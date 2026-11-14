@@ -1,0 +1,107 @@
+{
+ "customer": {
+  "name": "Northwind Recruiting",
+  "aliases": [
+   "Northwind"
+  ],
+  "domains": [
+   "northwind.example"
+  ],
+  "org_id": "org_nw",
+  "owners": [
+   "Alex (product and commercial)"
+  ],
+  "slack_channels": [],
+  "contacts": [
+   {
+    "name": "Lisa Bakker",
+    "role": "champion",
+    "emails": [
+     "lisa@northwind.example"
+    ],
+    "phones": [
+     "+31 6 3333 3333"
+    ],
+    "trust": {
+     "linkedin_connected": true,
+     "knows_me": "worked together",
+     "next_move": null
+    }
+   }
+  ]
+ },
+ "conversations": [
+  {
+   "id": "n1",
+   "channel": "linkedin",
+   "link": "https://example.ai/conversations/linkedin/n1",
+   "subject": "Weekly report",
+   "todo": "Lisa reads the new weekly report",
+   "ball": "them",
+   "waiting_since": "2026-11-10T15:00:00Z",
+   "status": "open",
+   "their_person": "Lisa Bakker",
+   "our_person": "Alex"
+  }
+ ],
+ "promises": [],
+ "wishes": [
+  {
+   "name": "weekly-report",
+   "kind": "feature",
+   "words": "A weekly report for the team lead",
+   "date": "2026-10-14",
+   "priority": "nice-to-have",
+   "customer": "northwind-recruiting",
+   "source": "https://example.ai/conversations/linkedin/n1",
+   "status": "shipped",
+   "reporter": "Lisa Bakker",
+   "shipped_at": "2026-11-10T09:00:00Z",
+   "told_at": "2026-11-10T15:00:00Z",
+   "told_by": "Alex"
+  }
+ ],
+ "meetings": {
+  "last": {
+   "who": "Alex with Lisa (Northwind)",
+   "at": "2026-09-20T10:00:00Z"
+  },
+  "next": null
+ },
+ "last_contact_at": "2026-11-10T15:00:00Z",
+ "last_message": {
+  "who": "Alex → Lisa (Northwind)",
+  "at": "2026-11-10T15:00:00Z",
+  "channel": "linkedin"
+ },
+ "usage": {
+  "at": "2026-11-12T06:00:00Z",
+  "active_users_14d": 4,
+  "active_users_prev_14d": 3,
+  "notes": ""
+ },
+ "standing": {},
+ "trust_log": [
+  {
+   "at": "2026-09-15T10:00:00Z",
+   "contact": "Lisa Bakker",
+   "kind": "visit",
+   "how": "in person"
+  },
+  {
+   "at": "2026-09-20T10:00:00Z",
+   "contact": "Lisa Bakker",
+   "kind": "call",
+   "how": "phone"
+  },
+  {
+   "at": "2026-11-10T15:00:00Z",
+   "contact": "Lisa Bakker",
+   "kind": "told",
+   "how": "linkedin"
+  }
+ ],
+ "drafts": [],
+ "calls_to_make": [],
+ "changed": null
+}

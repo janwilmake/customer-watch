@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="527" viewBox="0 0 1080 527" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">
+<rect width="1080" height="527" rx="16" fill="#16161d"/>
+<rect x="24" y="24" width="88" height="479" rx="14" fill="#22222c"/>
+<rect x="40" y="40" width="56" height="56" rx="14" fill="#2f6fed"/>
+<text x="68" y="77" font-size="24" font-weight="700" fill="#fff" text-anchor="middle" font-family="system-ui, sans-serif">A</text>
+<circle cx="94" cy="42" r="12" fill="#ff3b30"/>
+<text x="94" y="47" font-size="14" font-weight="700" fill="#fff" text-anchor="middle" font-family="system-ui, sans-serif">3</text>
+<rect x="40" y="124" width="56" height="56" rx="14" fill="#3a3a48"/>
+<text x="68" y="161" font-size="24" font-weight="700" fill="#fff" text-anchor="middle" font-family="system-ui, sans-serif">N</text>
+<rect x="40" y="208" width="56" height="56" rx="14" fill="#3a3a48"/>
+<text x="68" y="245" font-size="24" font-weight="700" fill="#fff" text-anchor="middle" font-family="system-ui, sans-serif">≡</text>
+<text x="150" y="52" font-size="20" font-weight="700" fill="#ffffff" font-family="system-ui, sans-serif">Watch: Acme Staffing</text>
+<text x="150" y="74" font-size="13" fill="#8a8a99" font-family="system-ui, sans-serif">customer-watch · rendered by note.py from the ledger and the clock, no model</text>
+<text x="150" y="106" font-size="13.5" font-weight="700" fill="#ffffff" xml:space="preserve">Acme Staffing — Late: 3 · Waiting for us: 2 · Waiting for them: 1 · Waiting for team: 1</text>
+<text x="150" y="127" font-size="13.5" font-weight="400" fill="#a9a9b8" xml:space="preserve">Last meeting: Alex with Sanne (Acme), Thu 5 Nov 14:00</text>
+<text x="150" y="148" font-size="13.5" font-weight="400" fill="#a9a9b8" xml:space="preserve">Last message: Sanne (Acme) → Alex, Thu 12 Nov 09:00 (intercom)</text>
+<text x="150" y="169" font-size="13.5" font-weight="400" fill="#a9a9b8" xml:space="preserve">Next meeting: Alex with Sanne and Pieter (Acme), Fri 13 Nov 10:00 (ask: coffee at our office, with …</text>
+<text x="150" y="190" font-size="13.5" font-weight="400" fill="#a9a9b8" xml:space="preserve">Changed: bulk-move-candidates went live on Wed 11 Nov; Sanne asked for it on 28 Oct</text>
+<text x="150" y="211" font-size="13.5" font-weight="700" fill="#ff6b6b" xml:space="preserve">Waiting for you:</text>
+<text x="150" y="232" font-size="13.5" font-weight="400" fill="#ff8f8f" xml:space="preserve">- (late: no reply for 2 working days) Answer Mo: why the export drops the phone number, and when it…</text>
+<text x="150" y="253" font-size="13.5" font-weight="400" fill="#ff8f8f" xml:space="preserve">- (late: open since Tue 20 Oct) feature inmail-templates</text>
+<text x="150" y="274" font-size="13.5" font-weight="400" fill="#ff8f8f" xml:space="preserve">- (late: live since Wed 11 Nov 11:00, not told) tell Sanne de Vries yourself: bulk-move-candidates</text>
+<text x="150" y="295" font-size="13.5" font-weight="700" fill="#5fa8ff" xml:space="preserve">Waiting for team:</text>
+<text x="150" y="316" font-size="13.5" font-weight="400" fill="#e6e6ec" xml:space="preserve">- Robin: change the invoice address in billing (asked Thu 12 Nov 10:00)</text>
+<text x="150" y="337" font-size="13.5" font-weight="700" fill="#ffb347" xml:space="preserve">Calls to make:</text>
+<text x="150" y="358" font-size="13.5" font-weight="400" fill="#e6e6ec" xml:space="preserve">- Pieter Jansen +31 6 2222 2222: the quote for 5 seats has had no answer for 7 working days</text>
+<text x="150" y="379" font-size="13.5" font-weight="400" fill="#c9c9d1" xml:space="preserve">  · Goal: hear what holds the 5 seats back</text>
+<text x="150" y="400" font-size="13.5" font-weight="400" fill="#c9c9d1" xml:space="preserve">  · Quote sent 3 Nov; Robin owns the deal, so tell him after</text>
+<text x="150" y="421" font-size="13.5" font-weight="400" fill="#c9c9d1" xml:space="preserve">  · Fact: 6 of 7 users active this fortnight</text>
+<text x="150" y="442" font-size="13.5" font-weight="400" fill="#c9c9d1" xml:space="preserve">  · Ask: coffee with Sanne at our office. Promise no discount</text>
+<text x="150" y="463" font-size="13.5" font-weight="700" fill="#c792ea" xml:space="preserve">Drafts ready:</text>
+<text x="150" y="484" font-size="13.5" font-weight="400" fill="#e6e6ec" xml:space="preserve">- Sanne de Vries (email): https://example.ai/drafts/d1</text>
+</svg>

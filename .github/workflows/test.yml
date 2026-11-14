@@ -1,0 +1,22 @@
+name: test
+on: [push, pull_request]
+jobs:
+  rules:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ["3.10", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m unittest discover tests -v
+      - name: The demo renders
+        env:
+          CUSTOMER_WATCH_HOME: examples/demo
+          CUSTOMER_WATCH_NOW: "2026-11-12T15:00:00Z"
+        run: |
+          python note.py demo
+          python nextstep.py acme-staffing > /dev/null
+          python trust.py --days 30
