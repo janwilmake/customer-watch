@@ -1,27 +1,26 @@
 # customer-watch
 
-**Give every customer their own Claude Code session.** It knows every mail, chat, ticket, call and
-meeting with that customer, tells you what is late, drafts your replies with the one next step
-that builds the relationship, and proposes the calls worth making, with notes. It never sends.
-You do.
+**Extend your software factory with your customers.** customer-watch gives every customer their
+own Claude Code session. It reads every mail, call, meeting and chat with them, and when your fix
+ships, it drafts the message that tells them, with the one next step that builds the relationship.
+It never sends. You do.
 
-![A customer-watch session: the Roost tile with a red badge of 3, and the note with what is late, a call to make with notes, and a draft ready](docs/note.svg)
+![customer-watch extends your software factory: the customer's message comes in, the factory builds it, and the message goes out to the customer the same day](docs/flow.svg)
 
 [![test](https://github.com/janwilmake/customer-watch/actions/workflows/test.yml/badge.svg)](https://github.com/janwilmake/customer-watch/actions/workflows/test.yml)
 [![MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-## For product engineers and FDEs
+## How to be a good product engineer
 
-With Claude Code you fix a customer's bug in hours. The customer still hears about it days later,
-or never. Their message sits in one of five inboxes. The promise you made on a call lives in a
-transcript nobody reads again. And the trust you build belongs to the company's CRM, not to you.
+Not by taking tickets from colleagues. By reading what your customers say yourself, and telling
+them yourself when it ships.
 
-customer-watch closes that loop. It sits around the pipeline you already have, on both ends:
-customer contact starts it, and the release brings it back to the customer, from the one session
-that knows every conversation with them.
+In most teams that loop breaks twice. On the way in, a customer's words become a colleague's
+summary in a ticket. On the way out, the fix goes live and nobody tells the customer. With Claude
+Code the factory in the middle got fast; both ends stayed slow.
 
-![customer-watch wraps your software factory: a message comes in, the factory builds it, and the message goes out to the customer the same day](docs/flow.svg)
-
+customer-watch makes both ends part of the loop, from the one session that knows every
+conversation with that customer:
 
 - **Nothing slips.** A shell gate checks every channel once a minute, with no model call. When the
   customer writes, calls or meets you, it wakes that customer's session, which reads it and updates
@@ -43,6 +42,10 @@ that knows every conversation with them.
   most customers asked for, and who needs attention, safe to post in a team channel.
 - **Your trust, measured.** `trust.py` counts your own personal touches, asks and their answers,
   fixes told and how fast. The relationships are yours; the ledgers stay your employer's.
+
+What a customer's session shows you, computed from its ledger and the clock:
+
+![A customer-watch session: the Roost tile with a red badge of 3, and the note with what is late, a call to make with notes, and a draft ready](docs/note.svg)
 
 ## Try it in 10 seconds
 
