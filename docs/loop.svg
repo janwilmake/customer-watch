@@ -1,45 +1,78 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
-  <defs>
-    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M0,0 L10,5 L0,10 z" fill="#c9c9d1"/>
-    </marker>
-  </defs>
-  <rect width="1200" height="520" rx="16" fill="#16161d"/>
-  <text x="48" y="62" font-size="28" font-weight="700" fill="#ffffff">customer-watch closes the loop</text>
-
-  <rect x="48" y="220" width="190" height="90" rx="14" fill="#1d3329" stroke="#4fd18b" stroke-width="2"/>
-  <text x="143" y="272" font-size="20" font-weight="700" fill="#ffffff" text-anchor="middle">Customer</text>
-
-  <rect x="330" y="110" width="290" height="90" rx="14" fill="#1c2b4d" stroke="#5fa8ff" stroke-width="2"/>
-  <text x="475" y="150" font-size="18" font-weight="700" fill="#ffffff" text-anchor="middle">customer-watch</text>
-  <text x="475" y="176" font-size="14" fill="#c9d6f0" text-anchor="middle">knows every conversation</text>
-
-  <rect x="700" y="200" width="452" height="130" rx="16" fill="none" stroke="#4a4a5a" stroke-width="2" stroke-dasharray="6 6"/>
-  <text x="716" y="226" font-size="13" fill="#8a8a99">your pipeline</text>
-  <rect x="716" y="242" width="120" height="70" rx="12" fill="#262633" stroke="#50505f"/>
-  <text x="776" y="283" font-size="16" font-weight="700" fill="#ffffff" text-anchor="middle">Ticket</text>
-  <rect x="874" y="242" width="120" height="70" rx="12" fill="#262633" stroke="#50505f"/>
-  <text x="934" y="283" font-size="16" font-weight="700" fill="#ffffff" text-anchor="middle">PR</text>
-  <rect x="1016" y="242" width="120" height="70" rx="12" fill="#262633" stroke="#50505f"/>
-  <text x="1076" y="283" font-size="16" font-weight="700" fill="#ffffff" text-anchor="middle">Production</text>
-  <path d="M836,277 H868" stroke="#c9c9d1" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
-  <path d="M994,277 H1010" stroke="#c9c9d1" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
-
-  <rect x="330" y="350" width="290" height="90" rx="14" fill="#1c2b4d" stroke="#5fa8ff" stroke-width="2"/>
-  <text x="475" y="390" font-size="18" font-weight="700" fill="#ffffff" text-anchor="middle">customer-watch</text>
-  <text x="475" y="416" font-size="14" fill="#c9d6f0" text-anchor="middle">drafts “it’s live” + next step</text>
-
-  <path d="M143,220 V155 H324" stroke="#c9c9d1" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
-  <text x="160" y="143" font-size="14" font-weight="700" fill="#ffffff">contact</text>
-
-  <path d="M620,155 H776 V236" stroke="#c9c9d1" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
-  <text x="640" y="143" font-size="14" font-weight="700" fill="#ffffff">ticket</text>
-
-  <path d="M1076,312 V395 H626" stroke="#c9c9d1" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
-  <text x="700" y="383" font-size="14" font-weight="700" fill="#ffffff">merged</text>
-
-  <path d="M330,395 H143 V316" stroke="#c9c9d1" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
-  <text x="160" y="383" font-size="14" font-weight="700" fill="#ffffff">told, same day</text>
-
-  <text x="48" y="490" font-size="15" fill="#8a8a99">Claude Code made the middle fast. customer-watch handles both ends.</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="880" viewBox="0 0 1200 880" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+<defs>
+<radialGradient id="bg" cx="50%" cy="50%" r="65%"><stop offset="0" stop-color="#1d1d2a"/><stop offset="1" stop-color="#121218"/></radialGradient>
+<filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="7" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+<linearGradient id="brand" x1="0" x2="1"><stop offset="0" stop-color="#4fd18b"/><stop offset="1" stop-color="#5fa8ff"/></linearGradient>
+<linearGradient id="arc0" gradientUnits="userSpaceOnUse" x1="600" y1="160" x2="851" y2="305"><stop offset="0" stop-color="#4fd18b"/><stop offset="1" stop-color="#5fa8ff"/></linearGradient>
+<linearGradient id="arc1" gradientUnits="userSpaceOnUse" x1="851" y1="305" x2="851" y2="595"><stop offset="0" stop-color="#5fa8ff"/><stop offset="1" stop-color="#a78bfa"/></linearGradient>
+<linearGradient id="arc2" gradientUnits="userSpaceOnUse" x1="851" y1="595" x2="600" y2="740"><stop offset="0" stop-color="#a78bfa"/><stop offset="1" stop-color="#a78bfa"/></linearGradient>
+<linearGradient id="arc3" gradientUnits="userSpaceOnUse" x1="600" y1="740" x2="349" y2="595"><stop offset="0" stop-color="#a78bfa"/><stop offset="1" stop-color="#a78bfa"/></linearGradient>
+<linearGradient id="arc4" gradientUnits="userSpaceOnUse" x1="349" y1="595" x2="349" y2="305"><stop offset="0" stop-color="#a78bfa"/><stop offset="1" stop-color="#5fa8ff"/></linearGradient>
+<linearGradient id="arc5" gradientUnits="userSpaceOnUse" x1="349" y1="305" x2="600" y2="160"><stop offset="0" stop-color="#5fa8ff"/><stop offset="1" stop-color="#4fd18b"/></linearGradient>
+</defs>
+<rect width="1200" height="880" rx="20" fill="url(#bg)"/>
+<path d="M918.7,634.0 A368,368 0 0 1 281.3,634.0 L416.4,556.0 A212,212 0 0 0 783.6,556.0 Z" fill="#a78bfa" fill-opacity="0.09" stroke="#a78bfa" stroke-opacity="0.25" stroke-dasharray="4 8"/>
+<text x="600" y="858" font-size="15" fill="#a78bfa" text-anchor="middle" letter-spacing="2">YOUR PIPELINE · ALREADY FAST WITH CLAUDE CODE</text>
+<path d="M600.0,160.0 A290,290 0 0 1 851.1,305.0" stroke="url(#arc0)" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.9"/>
+<path d="M-9,-11 L5,0 L-9,11" transform="translate(745.0,198.9) rotate(30.0)" stroke="#ffffff" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="772.0" y="175.4" font-size="19" font-weight="700" fill="#ffffff" text-anchor="start">contact</text>
+<path d="M851.1,305.0 A290,290 0 0 1 851.1,595.0" stroke="url(#arc1)" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.9"/>
+<path d="M-9,-11 L5,0 L-9,11" transform="translate(890.0,450.0) rotate(90.0)" stroke="#ffffff" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="934.0" y="456.0" font-size="19" font-weight="700" fill="#ffffff" text-anchor="start">wish → ticket</text>
+<path d="M851.1,595.0 A290,290 0 0 1 600.0,740.0" stroke="url(#arc2)" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.9"/>
+<path d="M-9,-11 L5,0 L-9,11" transform="translate(745.0,701.1) rotate(150.0)" stroke="#ffffff" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M600.0,740.0 A290,290 0 0 1 348.9,595.0" stroke="url(#arc3)" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.9"/>
+<path d="M-9,-11 L5,0 L-9,11" transform="translate(455.0,701.1) rotate(210.0)" stroke="#ffffff" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M348.9,595.0 A290,290 0 0 1 348.9,305.0" stroke="url(#arc4)" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.9"/>
+<path d="M-9,-11 L5,0 L-9,11" transform="translate(310.0,450.0) rotate(270.0)" stroke="#ffffff" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="266.0" y="456.0" font-size="19" font-weight="700" fill="#ffffff" text-anchor="end">merged</text>
+<path d="M348.9,305.0 A290,290 0 0 1 600.0,160.0" stroke="url(#arc5)" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.9"/>
+<path d="M-9,-11 L5,0 L-9,11" transform="translate(455.0,198.9) rotate(330.0)" stroke="#ffffff" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="428.0" y="175.4" font-size="19" font-weight="700" fill="#ffffff" text-anchor="end">told, same day</text>
+<circle r="8" fill="#ffffff" filter="url(#glow)"><animateMotion dur="9s" repeatCount="indefinite" path="M600.0,160.0 A290,290 0 0 1 600.0,740.0 A290,290 0 0 1 600.0,160.0"/></circle>
+<g transform="translate(600.0,160.0)">
+<circle r="72" fill="#4fd18b" opacity="0.10" filter="url(#glow)"/>
+<circle r="62" fill="#191924" stroke="#4fd18b" stroke-width="3"/>
+<circle cx="0" cy="-20" r="10" stroke="#4fd18b" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M-19,10 C-19,-6 19,-6 19,10" stroke="#4fd18b" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<text y="34" font-size="15" font-weight="700" fill="#ffffff" text-anchor="middle">Customer</text>
+</g>
+<g transform="translate(851.1,305.0)">
+<circle r="72" fill="#5fa8ff" opacity="0.10" filter="url(#glow)"/>
+<circle r="62" fill="#191924" stroke="#5fa8ff" stroke-width="3"/>
+<path d="M-24,-10 C-12,-26 12,-26 24,-10 C12,6 -12,6 -24,-10 Z" stroke="#5fa8ff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0" cy="-10" r="6" fill="#5fa8ff"/>
+<text y="34" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">customer-watch</text>
+</g>
+<text x="923.9" y="255.0" font-size="16" fill="#c9d6f0" text-anchor="start">knows every</text>
+<text x="923.9" y="277.0" font-size="16" fill="#c9d6f0" text-anchor="start">conversation</text>
+<g transform="translate(851.1,595.0)">
+<circle r="72" fill="#a78bfa" opacity="0.10" filter="url(#glow)"/>
+<circle r="62" fill="#191924" stroke="#a78bfa" stroke-width="3"/>
+<path d="M-20,-24 H20 V-16 A5,5 0 0 0 20,-6 V2 H-20 V-6 A5,5 0 0 0 -20,-16 Z" stroke="#a78bfa" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M-8,-14 H8 M-8,-8 H4" stroke="#a78bfa" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<text y="34" font-size="15" font-weight="700" fill="#ffffff" text-anchor="middle">Ticket</text>
+</g>
+<g transform="translate(600.0,740.0)">
+<circle r="72" fill="#a78bfa" opacity="0.10" filter="url(#glow)"/>
+<circle r="62" fill="#191924" stroke="#a78bfa" stroke-width="3"/>
+<circle cx="-10" cy="-24" r="4.5" stroke="#a78bfa" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="-10" cy="6" r="4.5" stroke="#a78bfa" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="-6" r="4.5" stroke="#a78bfa" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M-10,-19 V1 M-10,-17 C-10,-6 12,-14 12,-11" stroke="#a78bfa" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<text y="34" font-size="15" font-weight="700" fill="#ffffff" text-anchor="middle">PR</text>
+</g>
+<g transform="translate(348.9,595.0)">
+<circle r="72" fill="#a78bfa" opacity="0.10" filter="url(#glow)"/>
+<circle r="62" fill="#191924" stroke="#a78bfa" stroke-width="3"/>
+<path d="M4,-28 L-12,-6 H0 L-4,12 L12,-12 H0 Z" stroke="#a78bfa" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<text y="34" font-size="15" font-weight="700" fill="#ffffff" text-anchor="middle">Production</text>
+</g>
+<g transform="translate(348.9,305.0)">
+<circle r="72" fill="#5fa8ff" opacity="0.10" filter="url(#glow)"/>
+<circle r="62" fill="#191924" stroke="#5fa8ff" stroke-width="3"/>
+<path d="M-24,-10 C-12,-26 12,-26 24,-10 C12,6 -12,6 -24,-10 Z" stroke="#5fa8ff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0" cy="-10" r="6" fill="#5fa8ff"/>
+<text y="34" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">customer-watch</text>
+</g>
+<text x="276.1" y="255.0" font-size="16" fill="#c9d6f0" text-anchor="end">drafts “it’s live”</text>
+<text x="276.1" y="277.0" font-size="16" fill="#c9d6f0" text-anchor="end">+ the next step</text>
+<text x="600" y="406" font-size="40" font-weight="800" fill="url(#brand)" text-anchor="middle">customer-watch</text>
+<text x="600" y="440" font-size="17" fill="#a9a9b8" text-anchor="middle">one Claude Code session per customer</text>
+<text x="600" y="490" font-size="17" fill="#ff8f8f" text-anchor="middle">before: fixed in hours, told in days or never</text>
+<text x="600" y="518" font-size="17" font-weight="700" fill="#4fd18b" text-anchor="middle">now: told the same day</text>
+<text x="1168" y="854" font-size="13" fill="#6a6a7a" text-anchor="end">github.com/janwilmake/customer-watch</text>
 </svg>
