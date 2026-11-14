@@ -245,8 +245,8 @@ def roost(session):
     leds = ledgers()
     text = note.compact(leds, NOW).split("\n", 1)
     body = text[1] if len(text) > 1 else ""
-    notes = (f"About: overview of all {len(leds)} customers (report.py); the daily report goes to Slack.\n"
-             f"All customers — Late: {sum(len(note.late_items(l, NOW)) for l in leds.values())}\n" + body)
+    # Roost adds up the Late of every customer header, so no total line: it would count twice.
+    notes = f"About: overview of all {len(leds)} customers (report.py).\n" + body
     out = core.roost(session)
     if not out:
         print(notes)
