@@ -6,6 +6,7 @@ import copy
 import os
 import sys
 import unittest
+from unittest import mock
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.environ["CUSTOMER_WATCH_HOME"] = os.path.join(ROOT, "examples", "demo")
@@ -83,6 +84,14 @@ class NextStep(unittest.TestCase):
         s = step(led, "Pieter Jansen")
         self.assertEqual(s["ask"]["kind"], "visit")
         self.assertEqual(s["ask"]["check_with"], "Robin")
+
+    def test_the_commercial_owner_is_found_in_free_text(self):
+        for owners, team, want in ((["Luc (sales)"], [], "Luc"), (["Luc"], ["Luc"], "Luc"),
+                                   (["Luc van Poll"], ["Luc"], "Luc van Poll"), (["Robin (onboarding)"], [], None),
+                                   (["Alex (deal owner)"], [], None)):
+            led = {"customer": {"owners": owners}}
+            with mock.patch.dict(nextstep.ME, {"commercial_team": team}):
+                self.assertEqual(nextstep.commercial_owner(led), want, owners)
 
     def test_one_ask_a_month(self):
         led = ledger("northwind-recruiting")

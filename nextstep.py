@@ -12,6 +12,7 @@ The model runs this before every draft and puts `step` in it, worded in my own v
 """
 import datetime as dt
 import json
+import re
 import sys
 
 import core
@@ -31,11 +32,22 @@ def is_me(name):
     return bool(name) and any(m in name.lower() for m in mine)
 
 
+COMMERCIAL = re.compile(r"commercial|sales|deal|renewal|account", re.I)
+
+
 def commercial_owner(ledger):
-    """A teammate who owns the customer commercially, when that is not me: check with them before a visit."""
+    """A teammate who owns the customer commercially, when that is not me: check with them before a visit.
+
+    Owners are free text ("Luc", "Luc (sales)", "Luc van Poll (commercial)"). An owner counts when the
+    role names sales work, or when the name is in me.json -> commercial_team.
+    """
+    team = [n.lower() for n in ME.get("commercial_team") or []]
     for o in (ledger.get("customer") or {}).get("owners", []):
-        if "commercial" in o.lower() and not is_me(o):
-            return o.split("(")[0].strip()
+        person = o.split("(")[0].strip()
+        if is_me(person):
+            continue
+        if COMMERCIAL.search(o) or any(person.lower() == t or person.lower().startswith(t + " ") for t in team):
+            return person
     return None
 
 

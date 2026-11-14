@@ -18,5 +18,6 @@
   "decision maker"
  ],
  "office": "Example Street 1, Amsterdam",
- "ask_every_days": 28
+ "ask_every_days": 28,
+ "commercial_team": []
 }
