@@ -168,6 +168,36 @@ def probe_delegations(st, customers, ctx):
     return hits
 
 
+PR_URL = re.compile(r"https://github\.com/[^/\s]+/[^/\s]+/pull/\d+")
+
+
+def probe_releases(st, customers, ctx):
+    """A wish whose linked pull request merged: the fix is on its way to production, so tell the reporter.
+
+    A wish lists its pull requests in `prs` (GitHub urls). Uses the gh CLI; without it, nothing happens.
+    """
+    hits = []
+    for c in customers:
+        ledger = load(core.ledger_path(c.slug), {})
+        for w in ledger.get("wishes") or []:
+            if w.get("status") != "open":
+                continue
+            for url in [u for u in w.get("prs") or [] if PR_URL.fullmatch(u or "")]:
+                try:
+                    out = subprocess.run(["gh", "pr", "view", url, "--json", "state,mergedAt,title"],
+                                         capture_output=True, text=True, timeout=30)
+                except (OSError, subprocess.TimeoutExpired):
+                    return hits
+                if out.returncode != 0:
+                    continue
+                pr = json.loads(out.stdout)
+                if pr.get("state") == "MERGED":
+                    hits.append((c.slug, "release", f"{w.get('name')}:{url}", {
+                        "at": pr.get("mergedAt"), "wish": w.get("name"), "reporter": w.get("reporter"),
+                        "pr": url, "title": pr.get("title")}))
+    return hits
+
+
 def render_note(session):
     subprocess.run([sys.executable, os.path.join(SKILL, "note.py"), session, "--post"],
                    capture_output=True, timeout=60)
@@ -199,7 +229,7 @@ def main():
         fast = [p for p in fast if p is probe_intercom]
     mods = core.adapters()
     fast += [p for m in mods for p in getattr(m, "FAST_PROBES", [])]
-    slow = [p for m in mods for p in getattr(m, "SLOW_PROBES", [])]
+    slow = [probe_releases] + [p for m in mods for p in getattr(m, "SLOW_PROBES", [])]
     ctx = {"session": session, "watch": watch}
 
     state_path = os.path.join(sdir, "state.json")

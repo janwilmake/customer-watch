@@ -207,5 +207,18 @@ class Hubspot(unittest.TestCase):
         self.assertEqual(hits[0][:3], ("acme-staffing", "email", "emails:e1"))
 
 
+class Releases(unittest.TestCase):
+    def test_a_merged_pull_request_on_a_wish_wakes_the_session(self):
+        import gate
+        led = core.load(core.ledger_path("acme-staffing"), {})
+        led["wishes"][1]["prs"] = ["https://github.com/acme/app/pull/7", "not a url"]
+        done = mock.Mock(returncode=0, stdout='{"state": "MERGED", "mergedAt": "2026-11-12T13:00:00Z", "title": "InMail templates"}')
+        with mock.patch.object(gate, "load", return_value=led), mock.patch("subprocess.run", return_value=done) as run:
+            hits = gate.probe_releases({}, [ACME], {})
+        self.assertEqual(run.call_count, 1)  # the non-url is skipped
+        self.assertEqual(hits[0][1], "release")
+        self.assertEqual(hits[0][3]["wish"], "inmail-templates")
+
+
 if __name__ == "__main__":
     unittest.main()

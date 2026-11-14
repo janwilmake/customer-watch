@@ -16,11 +16,19 @@ With Claude Code you fix a customer's bug in hours. The customer still hears abo
 or never. Their message sits in one of five inboxes. The promise you made on a call lives in a
 transcript nobody reads again. And the trust you build belongs to the company's CRM, not to you.
 
-customer-watch closes that loop:
+customer-watch closes that loop. It sits around the pipeline you already have, on both ends:
+customer contact starts it, and the release brings it back to the customer, from the one session
+that knows every conversation with them.
+
+![customer-watch closes the loop: customer contact wakes the customer's session, a wish becomes a ticket, PR and release, and the merged PR wakes the same session to draft the "it's live" message](docs/loop.svg)
+
 
 - **Nothing slips.** A shell gate checks every channel once a minute, with no model call. When the
   customer writes, calls or meets you, it wakes that customer's session, which reads it and updates
   the ledger: who has the ball, what you promised and by when, what they wished for.
+- **The release brings it back.** Link a wish to its ticket and pull request. When the PR merges,
+  the gate wakes that customer's session, which drafts the "it's live" message to the person who
+  asked, with the whole history at hand.
 - **Late is computed, not guessed.** No answer for 24 working hours, a promise past its date, a
   fix that went live but nobody told the reporter: each is a red badge. Weekends do not count.
 - **Every draft carries the next best step.** Before a draft, `nextstep.py` reads your history with
@@ -85,6 +93,7 @@ Pick per channel. Mix freely: `"adapter": ["adapters/imap", "adapters/ical"]`.
 | Email, calls, meetings, notes | [`adapters/hubspot`](adapters/hubspot/ADAPTER.md) (untested, PRs welcome) | a HubSpot private app token | within a minute |
 | Support chat | built in | Intercom's MCP server | within a minute |
 | Team and Slack Connect channels | built in | Slack's MCP server | within a minute |
+| Releases | built in | the `gh` CLI, and the PR links on a wish | within 5 minutes of the merge |
 | Anything else | connector mode | any MCP connector your Claude Code session has: Gmail, Calendar, Fireflies, Gong, Attio… | every full check, 1–6 hours |
 
 The ready adapters use Python's standard library only. Their secrets come from the macOS

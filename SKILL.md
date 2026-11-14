@@ -72,7 +72,7 @@ customers; set `"full_tick_hours"` to 1 or 2 for them.
 On Start and on every full tick, for each listed connector:
 - read what changed since the last full tick (`state.json` → `last_full`) for this customer's
   domains, addresses and names: mail to or from them, meetings with them, transcripts, CRM activity;
-- treat each new thing as a `NEW` item (Tick, steps 1–5), and note in `changed` when a connector
+- treat each new thing as a `NEW` item (Tick, steps 1–6), and note in `changed` when a connector
   could not be read.
 
 ## Start
@@ -158,29 +158,34 @@ Runs on every gate exit.
 1. For each `NEW` item, read the full content with the source's own read tools. The gate matches
    broadly. Drop an item that is not about the customer, for example "makes sense" in Slack for a
    customer called Sense.
-2. For a `NEW` item with `"channel": "delegation"`: the teammate replied. Read the reply, then
+2. For a `NEW` item with `"channel": "release"`: a pull request linked to a wish merged. Check that
+   it is live (for example: the deploy after the merge finished, as your release process says).
+   Then set the wish `shipped` with `shipped_at`, and draft the told message to the reporter at once
+   (Drafting). When the wish gets a ticket or a pull request, add its link to `ticket` or `prs`, so
+   the gate sees the release.
+3. For a `NEW` item with `"channel": "delegation"`: the teammate replied. Read the reply, then
    decide: the next step is ours again (remove `delegated`; the item counts as Late or Waiting for
    us again), the item is done (`status: done`), or the teammate needs more time (set
    `delegated.since` to the reply time). See Delegating.
-3. Update the ledger: conversations (who has the ball), promises, wishes, meetings,
+4. Update the ledger: conversations (who has the ball), promises, wishes, meetings,
    `last_contact_at`, `last_message`, new contacts (add their match keys, so the gate finds them
    next time).
-4. Trust: for each item with `"from_me": true`, append a `trust_log` entry (Trust layer). When it
+5. Trust: for each item with `"from_me": true`, append a `trust_log` entry (Trust layer). When it
    answers one of the session's open `drafts`, mark that draft `sent`, and log the ask it carried
    (Drafting). When a customer answers an open ask, set its `outcome`. When a wish ships, set
    `shipped_at` and draft the told message at once (Drafting); when someone tells the customer, set
    `told_at` and `told_by`. When a call in `calls_to_make` shows up in the calls, close it and log it.
-5. Update only the standing questions that the new items bear on.
-6. On `full tick due`: refresh usage, `meetings.next` from the calendar, and answer all six
+6. Update only the standing questions that the new items bear on.
+7. On `full tick due`: refresh usage, `meetings.next` from the calendar, and answer all six
    standing questions again (`ADAPTER.md` says where usage comes from). Prepare the next meeting
    when it is within 48 hours (Trust layer). Run `nextstep.py <slug>`: for each contact with
    `call.suggest` and no open call, add one to `calls_to_make` (Calls). In a roster session, refresh `meetings.next` for every
    customer, but usage and the standing questions only for the five customers with the oldest
    `usage.at`, so each tick stays small.
-7. On `roster due (daily)`: follow Roster session → Every day.
-8. Set `changed` to the one most valuable change since the last tick, or `null`. Example:
+8. On `roster due (daily)`: follow Roster session → Every day.
+9. Set `changed` to the one most valuable change since the last tick, or `null`. Example:
    "champion left", "sync coverage fell to 40%", "asked for a price for 5 more seats".
-9. `python3 note.py <session-id> --post`. If the main contact changed, compose the picture again
+10. `python3 note.py <session-id> --post`. If the main contact changed, compose the picture again
    (Picture). Then arm the gate again.
 
 ## Trust layer
@@ -315,7 +320,7 @@ example by a Slack DM), mark that item:
 - After `back_after_working_days` working days without a reply, it counts as Late again: "(late:
   Robin has not replied for 2 working days)".
 - The gate reads `via` and its thread every 60 s. A message from `slack_user` after `ts` wakes the
-  session with a `delegation` item (Tick, step 2).
+  session with a `delegation` item (Tick, step 3).
 
 ### Wish record
 
@@ -325,6 +330,7 @@ Keep this format stable: a weekly roll-up session groups wishes across all ledge
 {"name": "bulk-move-candidates", "kind": "feature | bug", "words": "the customer's own words",
  "date": "YYYY-MM-DD", "priority": "must-have | nice-to-have", "customer": "<slug>",
  "source": "<deep link>", "status": "open | shipped | dropped",
+ "ticket": "<ticket url or id, when one exists>", "prs": ["https://github.com/<owner>/<repo>/pull/<n>"],
  "reporter": "<contact name>", "shipped_at": "ISO", "told_at": "ISO", "told_by": "<name>"}
 ```
 
