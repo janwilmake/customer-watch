@@ -191,7 +191,7 @@ cadence, your boundaries. Every session reads it before every draft. A starter i
 | `gate.py <session> --wait` | probe until something new matches, then print `NEW` lines and a `WAKE` line |
 | `note.py <session> [--post]` | render the note, write `note.md`, and post it to Roost |
 | `nextstep.py <slug> [<contact>]` | the next best step per contact: the ask, the call, the line for a draft |
-| `report.py daily\|weekly\|roost <session>` | one overview across all customers: daily for you, weekly for your team (company names and counts only) |
+| `report.py daily\|weekly\|roost <session>` | one overview across all customers: daily for you, weekly for your team (names optional, never phone numbers) |
 | `trust.py [--days 7] [--names]` | your trust work; `--backfill 30` logs your own sent messages |
 | `roster.py <session> [--apply]` | the "everyone else" customer set of a roster session |
 | `picture.py` | a session picture: the main contact's face with the company logo |

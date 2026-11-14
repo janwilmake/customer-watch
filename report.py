@@ -4,8 +4,10 @@
 Usage:
   report.py daily            for me: what is late, the calls to make, the drafts to send, today's meetings
   report.py weekly           for the team: status per customer, the most-asked wishes, what shipped,
-                             who is at risk, and my trust work. No person names, phone numbers or
-                             message text: company names and counts only.
+                             who is at risk, and my trust work. Company names and counts only, unless
+                             config.json sets "report": {"names": true}: then it also names the
+                             champion, the individual trials and the reporter of each fix. Never a
+                             phone number or message text.
   report.py roost <session>  post the daily overview to that session's Roost note (Late badge)
 
 It prints Markdown that Slack and most chat tools render. The session that runs the report sends it.
@@ -141,12 +143,20 @@ def daily():
 
 # ---- weekly, for the team -----------------------------------------------------------------------
 
+def champion(led):
+    for p in (led.get("customer") or {}).get("contacts", []):
+        if "champion" in (p.get("role") or "").lower() and p.get("name"):
+            return p["name"]
+    return None
+
+
 def weekly():
+    names = bool((core.config().get("report") or {}).get("names"))
     leds = ledgers()
     week = NOW - dt.timedelta(days=7)
     me = ME.get("first_name") or "me"
-    companies = {s: l for s, l in leds.items() if not is_person(l)}
-    people = {s: l for s, l in leds.items() if is_person(l)}
+    companies = {s: l for s, l in leds.items() if names or not is_person(l)}
+    people = {s: l for s, l in leds.items() if not names and is_person(l)}
 
     touches = [e for l in leds.values() for e in l.get("trust_log") or [] if parse(e.get("at")) and parse(e["at"]) >= week]
     asks = [e for e in touches if e.get("kind") == "ask"]
@@ -171,7 +181,8 @@ def weekly():
         u = l.get("usage") or {}
         users = f" · users {u.get('active_users_14d')} ({u.get('active_users_prev_14d')} before)" if u.get("active_users_14d") is not None else ""
         nxt = parse(((l.get("meetings") or {}).get("next") or {}).get("at"))
-        line = (f"• **{name(s, l)}** — late {late} · waiting for us {ours} · for them {theirs} · "
+        champ = champion(l) if names else None
+        line = (f"• **{name(s, l)}**" + (f" ({champ})" if champ else "") + f" — late {late} · waiting for us {ours} · for them {theirs} · "
                 f"last contact {when(l.get('last_contact_at'))[:10].rstrip()}"
                 + (f" · next meeting {when(core.iso(nxt))[:10].rstrip()}" if nxt and nxt >= NOW else "") + users)
         rows.append((-late, -ours, name(s, l).lower(), line))
@@ -203,7 +214,9 @@ def weekly():
     if shipped:
         out.append("\n**Shipped this week**")
         for s, w in shipped[:10]:
-            who = "an individual trial" if is_person(leds[s]) else name(s, leds[s])
+            who = name(s, leds[s]) if names or not is_person(leds[s]) else "an individual trial"
+            if names and w.get("reporter"):
+                who += f" ({w['reporter']})"
             out.append(f"• `{w.get('name')}` for {who} — " + ("told ✅" if w.get("told_at") else "not told yet"))
 
     risk = []

@@ -125,6 +125,15 @@ class Report(unittest.TestCase):
             self.assertNotIn(private, text)
         self.assertLess(len(text), 5000)  # one Slack message
 
+    def test_with_names_on_the_team_report_names_the_champion_but_never_a_phone_number(self):
+        from unittest import mock
+        cfg = {**core.config(), "report": {"names": True}}
+        with mock.patch.object(core, "config", return_value=cfg):
+            text = self.report.weekly()
+        self.assertIn("Acme Staffing** (Sanne de Vries)", text)
+        self.assertIn("(Sanne de Vries) — not told yet", text)
+        self.assertNotIn("+31", text)
+
 
 if __name__ == "__main__":
     unittest.main()

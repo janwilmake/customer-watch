@@ -374,8 +374,9 @@ one session that the user picks for it.
   sent, meetings in the next 36 hours, and customers whose watch looks stale or has no session.
 - `report.py weekly`: for the team. Status per customer, the most-asked open wishes across all
   customers, what shipped and whether the reporter was told, who needs attention, and the user's
-  trust count. Company names and counts only: no person names, phone numbers or message text, so it
-  can go to a team channel. Under 5,000 characters, one chat message.
+  trust count. Company names and counts only by default; with `config.json` → `"report": {"names":
+  true}` it also names the champion, the individual trials and the reporter of each fix. Never a
+  phone number or message text. Under 5,000 characters, one chat message.
 - `report.py roost <session-id>`: the daily overview as that session's note, with the Late badge.
 
 The session that runs a report sends it where the user said (for example a DM to themselves, or a
