@@ -20,7 +20,7 @@ customer-watch closes that loop. It sits around the pipeline you already have, o
 customer contact starts it, and the release brings it back to the customer, from the one session
 that knows every conversation with them.
 
-![customer-watch closes the loop: customer contact wakes the customer's session, a wish becomes a ticket, PR and release, and the merged PR wakes the same session to draft the "it's live" message](docs/loop.svg)
+![customer-watch wraps your software factory: a message comes in, the factory builds it, and the message goes out to the customer the same day](docs/flow.svg)
 
 
 - **Nothing slips.** A shell gate checks every channel once a minute, with no model call. When the
