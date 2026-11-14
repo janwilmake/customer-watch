@@ -1,68 +1,45 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="640" viewBox="0 0 1200 640" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M0,0 L10,5 L0,10 z" fill="#c9c9d1"/>
     </marker>
   </defs>
-  <rect width="1200" height="640" rx="16" fill="#16161d"/>
+  <rect width="1200" height="520" rx="16" fill="#16161d"/>
+  <text x="48" y="62" font-size="28" font-weight="700" fill="#ffffff">customer-watch closes the loop</text>
 
-  <text x="48" y="58" font-size="26" font-weight="700" fill="#ffffff">customer-watch closes the loop around your pipeline</text>
-  <text x="48" y="88" font-size="15" fill="#8a8a99">Claude Code made the middle fast. The two ends are where customers wait.</text>
+  <rect x="48" y="220" width="190" height="90" rx="14" fill="#1d3329" stroke="#4fd18b" stroke-width="2"/>
+  <text x="143" y="272" font-size="20" font-weight="700" fill="#ffffff" text-anchor="middle">Customer</text>
 
-  <!-- the customer -->
-  <rect x="48" y="280" width="190" height="110" rx="14" fill="#1d3329" stroke="#4fd18b" stroke-width="2"/>
-  <text x="143" y="326" font-size="20" font-weight="700" fill="#ffffff" text-anchor="middle">Customer</text>
-  <text x="143" y="352" font-size="13" fill="#a9c9b6" text-anchor="middle">Sanne · Acme Staffing</text>
+  <rect x="330" y="110" width="290" height="90" rx="14" fill="#1c2b4d" stroke="#5fa8ff" stroke-width="2"/>
+  <text x="475" y="150" font-size="18" font-weight="700" fill="#ffffff" text-anchor="middle">customer-watch</text>
+  <text x="475" y="176" font-size="14" fill="#c9d6f0" text-anchor="middle">knows every conversation</text>
 
-  <!-- the session, on the way in -->
-  <rect x="330" y="130" width="290" height="130" rx="14" fill="#1c2b4d" stroke="#5fa8ff" stroke-width="2"/>
-  <text x="350" y="163" font-size="17" font-weight="700" fill="#ffffff">customer-watch session</text>
-  <text x="350" y="191" font-size="13" fill="#c9d6f0">one Claude Code session per customer</text>
-  <text x="350" y="213" font-size="13" fill="#c9d6f0">reads every mail, call, meeting, chat</text>
-  <text x="350" y="235" font-size="13" fill="#c9d6f0">ledger: who has the ball, promises, wishes</text>
+  <rect x="700" y="200" width="452" height="130" rx="16" fill="none" stroke="#4a4a5a" stroke-width="2" stroke-dasharray="6 6"/>
+  <text x="716" y="226" font-size="13" fill="#8a8a99">your pipeline</text>
+  <rect x="716" y="242" width="120" height="70" rx="12" fill="#262633" stroke="#50505f"/>
+  <text x="776" y="283" font-size="16" font-weight="700" fill="#ffffff" text-anchor="middle">Ticket</text>
+  <rect x="874" y="242" width="120" height="70" rx="12" fill="#262633" stroke="#50505f"/>
+  <text x="934" y="283" font-size="16" font-weight="700" fill="#ffffff" text-anchor="middle">PR</text>
+  <rect x="1016" y="242" width="120" height="70" rx="12" fill="#262633" stroke="#50505f"/>
+  <text x="1076" y="283" font-size="16" font-weight="700" fill="#ffffff" text-anchor="middle">Production</text>
+  <path d="M836,277 H868" stroke="#c9c9d1" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <path d="M994,277 H1010" stroke="#c9c9d1" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
 
-  <!-- your pipeline -->
-  <rect x="700" y="250" width="452" height="170" rx="16" fill="none" stroke="#4a4a5a" stroke-width="2" stroke-dasharray="6 6"/>
-  <text x="716" y="278" font-size="13" fill="#8a8a99">your pipeline, already fast with Claude Code</text>
-  <rect x="716" y="300" width="120" height="90" rx="12" fill="#262633" stroke="#50505f"/>
-  <text x="776" y="341" font-size="16" font-weight="700" fill="#ffffff" text-anchor="middle">Ticket</text>
-  <text x="776" y="364" font-size="12" fill="#8a8a99" text-anchor="middle">Linear, Jira, …</text>
-  <rect x="874" y="300" width="120" height="90" rx="12" fill="#262633" stroke="#50505f"/>
-  <text x="934" y="341" font-size="16" font-weight="700" fill="#ffffff" text-anchor="middle">PR</text>
-  <text x="934" y="364" font-size="12" fill="#8a8a99" text-anchor="middle">review, CI</text>
-  <rect x="1016" y="300" width="120" height="90" rx="12" fill="#262633" stroke="#50505f"/>
-  <text x="1076" y="341" font-size="16" font-weight="700" fill="#ffffff" text-anchor="middle">Production</text>
-  <text x="1076" y="364" font-size="12" fill="#8a8a99" text-anchor="middle">merge, deploy</text>
-  <path d="M836,345 H868" stroke="#c9c9d1" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
-  <path d="M994,345 H1010" stroke="#c9c9d1" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <rect x="330" y="350" width="290" height="90" rx="14" fill="#1c2b4d" stroke="#5fa8ff" stroke-width="2"/>
+  <text x="475" y="390" font-size="18" font-weight="700" fill="#ffffff" text-anchor="middle">customer-watch</text>
+  <text x="475" y="416" font-size="14" fill="#c9d6f0" text-anchor="middle">drafts “it’s live” + next step</text>
 
-  <!-- the session, on the way out -->
-  <rect x="330" y="440" width="290" height="130" rx="14" fill="#1c2b4d" stroke="#5fa8ff" stroke-width="2"/>
-  <text x="350" y="473" font-size="17" font-weight="700" fill="#ffffff">same session, all the context</text>
-  <text x="350" y="501" font-size="13" fill="#c9d6f0">drafts “it’s live” to the person who asked</text>
-  <text x="350" y="523" font-size="13" fill="#c9d6f0">plus one next step: coffee, call, 15 min</text>
-  <text x="350" y="545" font-size="13" fill="#c9d6f0">drafts, never sends</text>
+  <path d="M143,220 V155 H324" stroke="#c9c9d1" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <text x="160" y="143" font-size="14" font-weight="700" fill="#ffffff">contact</text>
 
-  <!-- 1: contact -->
-  <path d="M143,280 V195 H324" stroke="#c9c9d1" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
-  <text x="158" y="184" font-size="13" font-weight="700" fill="#ffffff">① customer contact</text>
-  <text x="158" y="214" font-size="12" fill="#8a8a99">mail · call · meeting · chat</text>
+  <path d="M620,155 H776 V236" stroke="#c9c9d1" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <text x="640" y="143" font-size="14" font-weight="700" fill="#ffffff">ticket</text>
 
-  <!-- 2: wish to ticket -->
-  <path d="M620,195 H776 V294" stroke="#c9c9d1" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
-  <text x="636" y="184" font-size="13" font-weight="700" fill="#ffffff">② wish → ticket</text>
-  <text x="636" y="214" font-size="12" fill="#8a8a99">linked in the ledger</text>
+  <path d="M1076,312 V395 H626" stroke="#c9c9d1" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <text x="700" y="383" font-size="14" font-weight="700" fill="#ffffff">merged</text>
 
-  <!-- 3: release -->
-  <path d="M1076,390 V505 H626" stroke="#c9c9d1" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
-  <text x="700" y="494" font-size="13" font-weight="700" fill="#ffffff">③ release: the linked PR merged</text>
-  <text x="700" y="526" font-size="12" fill="#8a8a99">the gate checks every 5 minutes, no tokens</text>
+  <path d="M330,395 H143 V316" stroke="#c9c9d1" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <text x="160" y="383" font-size="14" font-weight="700" fill="#ffffff">told, same day</text>
 
-  <!-- 4: told -->
-  <path d="M330,505 H143 V396" stroke="#c9c9d1" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
-  <text x="158" y="494" font-size="13" font-weight="700" fill="#ffffff">④ told, same day</text>
-  <text x="158" y="526" font-size="12" fill="#8a8a99">you press Send</text>
-
-  <text x="48" y="612" font-size="14" fill="#ff8f8f">Without it: fixed in hours, told in days, or never.</text>
-  <text x="640" y="612" font-size="14" fill="#4fd18b">With it: told the same day, with the full history.</text>
+  <text x="48" y="490" font-size="15" fill="#8a8a99">Claude Code made the middle fast. customer-watch handles both ends.</text>
 </svg>
