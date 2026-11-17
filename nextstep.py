@@ -73,7 +73,7 @@ def signals(ledger, contact, now):
     # A late promise is worth a call once it is 2 working days late, to that one person.
     late_promises = [p for p in late_to_them if working_hours(parse(p["due"]), now) >= 48]
     late_answers = [c for c in ours if parse(c.get("waiting_since"))
-                    and working_hours(parse(c["waiting_since"]), now) > note.LATE_HOURS]
+                    and now > note.reply_by(parse(c["waiting_since"]))]
     return {
         "name": name, "role": contact.get("role"), "phone": (contact.get("phones") or [None])[0],
         "last_touch": {"at": log[0]["at"], "how": log[0].get("how") or log[0].get("kind")} if log else None,

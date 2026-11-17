@@ -60,12 +60,43 @@ def add_working_hours(since, hours):
 
 
 BACK_AFTER_WORKING_DAYS = 2
+END_OF_DAY = 18
+
+
+def end_of_working_day(t):
+    """18:00 on the working day of `t`, or of the next working day when `t` is after 18:00 or in a weekend.
+
+    A deadline worked out from a rule lands here, so it reads as a day and not as a stray minute.
+    """
+    t = t.astimezone(AMS)
+    end = t.replace(hour=END_OF_DAY, minute=0, second=0, microsecond=0)
+    if t > end:
+        end += dt.timedelta(days=1)
+    while end.weekday() >= 5:
+        end += dt.timedelta(days=1)
+    return end
+
+
+def reply_by(since):
+    return end_of_working_day(add_working_hours(since, LATE_HOURS))
+
+
+def back_by(d):
+    return end_of_working_day(add_working_hours(parse(d["since"]), d.get("back_after_working_days", BACK_AFTER_WORKING_DAYS) * 24))
+
+
+def wish_due(w):
+    return end_of_working_day(parse(w["date"]) + dt.timedelta(days=14))
+
+
+def touch_due(last):
+    return end_of_working_day(last + dt.timedelta(days=7))
 
 
 def due(item):
     """When an open item of ours turns late: the reply limit of a conversation, or the date of a promise."""
     if item.get("ball") == "us" and parse(item.get("waiting_since")):
-        return add_working_hours(parse(item["waiting_since"]), LATE_HOURS)
+        return reply_by(parse(item["waiting_since"]))
     return parse(item.get("due"))
 
 
@@ -94,11 +125,10 @@ def delegations(ledger, now):
                 continue
             days = working_hours(parse(d["since"]), now) / 24
             who = d.get("to") or "the team"
-            if days >= d.get("back_after_working_days", BACK_AFTER_WORKING_DAYS):
+            if now > back_by(d):
                 late.append((item, f"(late: {who} has not replied for {days:.0f} working days) {d.get('ask') or label(item)}"))
             else:
-                back = add_working_hours(parse(d["since"]), d.get("back_after_working_days", BACK_AFTER_WORKING_DAYS) * 24)
-                team.append((item, f"{who}: {d.get('ask') or label(item)} (asked {when(d['since'])}, back by {when(back.isoformat())})"))
+                team.append((item, f"{who}: {d.get('ask') or label(item)} (asked {when(d['since'])}, back by {when(back_by(d).isoformat())})"))
     return team, late
 
 
@@ -141,7 +171,7 @@ def late_items(ledger, now):
             continue
         if c.get("status") == "open" and c.get("ball") == "us" and c.get("waiting_since"):
             hours = working_hours(parse(c["waiting_since"]), now)
-            if hours > LATE_HOURS:
+            if now > due(c):
                 items.append(f"(late: no reply for {hours / 24:.0f} working days) {c.get('todo') or c.get('subject')}")
                 late_sources |= {c.get("link"), c.get("id")} - {None, ""}
     for p in ledger.get("promises", []):
@@ -167,14 +197,14 @@ def late_items(ledger, now):
         if w.get("name") in promised or w.get("source") in promised or w.get("source") in theirs:
             continue
         if (w.get("status") == "open" and w.get("priority") == "must-have"
-                and parse(w.get("date")) and (now - parse(w["date"])).days > 14):
+                and parse(w.get("date")) and now > wish_due(w)):
             items.append(f"(late: open since {when(w['date'])[:10].rstrip()}) {w.get('kind', 'feature')} {w.get('name')}")
     for w, hours in untold(ledger, now):
-        if hours > LATE_HOURS:
+        if now > reply_by(parse(w["shipped_at"])):
             items.append(f"(late: live since {when(w['shipped_at'])}, not told) tell {w.get('reporter') or 'the reporter'} yourself: {w.get('name')}")
     last = parse(ledger.get("last_contact_at"))
     upcoming = parse(((ledger.get("meetings") or {}).get("next") or {}).get("at"))
-    if last and (now - last).days > 7 and not (upcoming and upcoming > now):
+    if last and now > touch_due(last) and not (upcoming and upcoming > now):
         items.append(f"(late: no contact since {when(ledger['last_contact_at'])}) plan a touchpoint")
     return items
 
@@ -190,8 +220,7 @@ def deadline_items(ledger, now):
         for item in ledger.get(kind, []):
             d = delegated(item)
             if d:
-                back = add_working_hours(parse(d["since"]), d.get("back_after_working_days", BACK_AFTER_WORKING_DAYS) * 24)
-                out.append((back, f"{d.get('to') or 'the team'}: {d.get('ask') or label(item)}"))
+                out.append((back_by(d), f"{d.get('to') or 'the team'}: {d.get('ask') or label(item)}"))
                 covered |= sources(item)
             elif in_progress(item, now):
                 ip = item["in_progress"]
@@ -212,14 +241,14 @@ def deadline_items(ledger, now):
         if (w.get("status") == "open" and w.get("priority") == "must-have" and parse(w.get("date"))
                 and not delegated(w) and not in_progress(w, now)
                 and not ({w.get("name"), w.get("source")} & (covered | theirs))):
-            out.append((parse(w["date"]) + dt.timedelta(days=14), f"{w.get('kind', 'feature')} {w.get('name')}"))
+            out.append((wish_due(w), f"{w.get('kind', 'feature')} {w.get('name')}"))
     for w, _ in untold(ledger, now):
-        out.append((add_working_hours(parse(w["shipped_at"]), LATE_HOURS),
+        out.append((reply_by(parse(w["shipped_at"])),
                     f"tell {w.get('reporter') or 'the reporter'} that {w.get('name')} is live"))
     last = parse(ledger.get("last_contact_at"))
     upcoming = parse(((ledger.get("meetings") or {}).get("next") or {}).get("at"))
     if last and not (upcoming and upcoming > now):
-        out.append((last + dt.timedelta(days=7), "plan a touchpoint"))
+        out.append((touch_due(last), "plan a touchpoint"))
     return sorted(out, key=lambda x: x[0])
 
 
@@ -249,7 +278,7 @@ def trust_moves(ledger, now):
     import nextstep
     moves = []
     for w, hours in untold(ledger, now):
-        if hours <= LATE_HOURS:
+        if now <= reply_by(parse(w["shipped_at"])):
             moves.append(f"tell {w.get('reporter') or 'the reporter'} yourself that {w.get('name')} is live (a short video works best)")
     every = ME.get("touch_every_days", 21)
     for st in nextstep.contact_steps(ledger, now):

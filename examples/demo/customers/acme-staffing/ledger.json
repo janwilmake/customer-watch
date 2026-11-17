@@ -124,7 +124,7 @@
    "source": "https://example.ai/conversations/meeting/m0",
    "status": "shipped",
    "reporter": "Sanne de Vries",
-   "shipped_at": "2026-11-11T10:00:00Z"
+   "shipped_at": "2026-11-10T10:00:00Z"
   },
   {
    "name": "inmail-templates",

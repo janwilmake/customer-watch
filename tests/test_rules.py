@@ -48,6 +48,13 @@ class Late(unittest.TestCase):
         led["wishes"][0]["told_at"] = "2026-11-11T12:00:00Z"
         self.assertFalse(any("not told" in i for i in note.late_items(led, NOW)))
 
+    def test_a_reply_is_due_at_the_end_of_the_next_working_day(self):
+        led = ledger("northwind-recruiting")
+        led["conversations"][0].update(ball="us", waiting_since="2026-11-12T08:37:00Z")  # Thu 09:37 Amsterdam
+        self.assertEqual(note.due(led["conversations"][0]).strftime("%a %H:%M"), "Fri 18:00")
+        led["conversations"][0].update(waiting_since="2026-11-13T19:13:00Z")  # Fri 20:13
+        self.assertEqual(note.due(led["conversations"][0]).strftime("%a %H:%M"), "Tue 18:00")
+
     def test_weekends_do_not_count(self):
         led = ledger("northwind-recruiting")
         led["conversations"][0].update(ball="us", waiting_since="2026-11-13T15:00:00Z")  # Friday
