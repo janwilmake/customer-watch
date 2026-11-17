@@ -294,7 +294,8 @@ the ball changes hands, also to `them`: `nextstep.py` proposes a call after five
 without their answer. `customer.name_match: false`
 stops the gate from matching the name in meeting titles and Slack (a trial named after one person).
 `customer.org_ids` lists every org of the customer. `note.py` counts a conversation as late after
-more than `late_after_working_hours` (default 24) on Monday to Friday, local time. Do not record one
+more than `late_after_working_hours` (default 24) on Monday to Friday, local time, and shows that
+moment, or a promise's `due`, as "(due …)" on each open item. Give every promise a `due`. Do not record one
 thing twice, for example as a promise and as a wish. When a promise or a conversation is about a
 wish, give the promise `"wish": "<wish name>"` or the wish the conversation's `link` as `source`;
 `note.py` then counts that late thing once. A must-have wish older than two weeks is late, except

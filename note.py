@@ -46,7 +46,32 @@ def working_hours(since, until):
     return total
 
 
+def add_working_hours(since, hours):
+    """The moment that lies `hours` working hours (Monday to Friday, the user's timezone) after `since`."""
+    t, left = since.astimezone(AMS), hours
+    while True:
+        step = (t + dt.timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+        if t.weekday() < 5:
+            span = (step - t).total_seconds() / 3600
+            if span >= left:
+                return t + dt.timedelta(hours=left)
+            left -= span
+        t = step
+
+
 BACK_AFTER_WORKING_DAYS = 2
+
+
+def due(item):
+    """When an open item of ours turns late: the reply limit of a conversation, or the date of a promise."""
+    if item.get("ball") == "us" and parse(item.get("waiting_since")):
+        return add_working_hours(parse(item["waiting_since"]), LATE_HOURS)
+    return parse(item.get("due"))
+
+
+def with_due(text, item):
+    d = due(item)
+    return f"{text} (due {when(d.isoformat())})" if d else text
 
 
 def label(item):
@@ -72,7 +97,8 @@ def delegations(ledger, now):
             if days >= d.get("back_after_working_days", BACK_AFTER_WORKING_DAYS):
                 late.append((item, f"(late: {who} has not replied for {days:.0f} working days) {d.get('ask') or label(item)}"))
             else:
-                team.append((item, f"{who}: {d.get('ask') or label(item)} (asked {when(d['since'])})"))
+                back = add_working_hours(parse(d["since"]), d.get("back_after_working_days", BACK_AFTER_WORKING_DAYS) * 24)
+                team.append((item, f"{who}: {d.get('ask') or label(item)} (asked {when(d['since'])}, back by {when(back.isoformat())})"))
     return team, late
 
 
@@ -245,9 +271,10 @@ def block(slug, ledger, now, prefix):
         lines += ["Waiting for team:"] + [f"- {i}" for i in team]
     if busy:
         lines += ["In progress:"] + [f"- {i}" for i in busy]
-    open_now = [x for x in ours if x in convs and not any((x.get("todo") or x.get("subject") or "") in i for i in late)]
+    open_now = [x for x in ours if not any(label(x) in i for i in late)]
+    open_now.sort(key=lambda x: due(x) or now + dt.timedelta(days=3650))
     if open_now:
-        lines += ["Open, not late:"] + [f"- {x.get('todo') or x.get('subject')}" for x in open_now[:4]]
+        lines += ["Open, not late:"] + [f"- {with_due(label(x), x)}" for x in open_now[:4]]
     todo_calls = calls(ledger)
     if todo_calls:
         lines.append("Calls to make:")
@@ -290,7 +317,9 @@ def compact(ledgers, now):
         if not late and not ours and not team and not busy:
             quiet += 1
             continue
-        rows.append((len(late), ours, name, theirs, late, team, busy))
+        dues = [d for d in (due(x) for x in convs + ledger.get("promises", [])
+                            if x.get("status") == "open" and not delegated(x) and not in_progress(x, now)) if d and d >= now]
+        rows.append((len(late), ours, name, theirs, late, team, busy, min(dues) if dues else None))
     rows.sort(key=lambda r: (-r[0], -r[1], r[2].lower()))
     head = CFG["roster_about"].format(n=len(ledgers))
     moves = [(name, m) for slug, ledger in ledgers.items()
@@ -308,8 +337,9 @@ def compact(ledgers, now):
     # Every header with Late stays, so the badge stays whole; item lines go first when space runs out.
     items = [[f"- {short(i, 75)}" for i in late] + [f"- team: {short(i, 75)}" for i in team]
              + [f"- in progress: {short(i, 75)}" for i in busy]
-             for _, _, _, _, late, team, busy in lates]
-    tail = [f"Waiting for us, not late: " + ", ".join(f"{r[2]} ({r[1]})" for r in calm) if calm else "",
+             for _, _, _, _, late, team, busy, _ in lates]
+    tail = [f"Waiting for us, not late: " + ", ".join(
+                f"{r[2]} ({r[1]}{', next due ' + when(r[7].isoformat()) if r[7] else ''})" for r in calm) if calm else "",
             f"{quiet} quiet." if quiet else "",
             f"Calls to make: " + ", ".join(f"{c.get('contact')} ({name})" for name, c in todo_calls[:3]) if todo_calls else "",
             f"Drafts ready: {len(ready)}" if ready else "",
@@ -317,7 +347,7 @@ def compact(ledgers, now):
 
     def render(shown):
         lines = [head]
-        for (n_late, ours, name, theirs, late, team, busy), its in zip(lates, items):
+        for (n_late, ours, name, theirs, late, team, busy, _), its in zip(lates, items):
             lines.append(header(n_late, ours, name, theirs, team, busy))
             lines += [i for i in its if i in shown]
         return "\n".join(x for x in lines + tail if x)
