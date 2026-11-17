@@ -179,6 +179,50 @@ def late_items(ledger, now):
     return items
 
 
+def deadline_items(ledger, now):
+    """(moment, text) for every open thing with a date: when it turns late, or when it turned late.
+
+    Roost gets these next to the note, so the agenda holds them all while the note stays short.
+    """
+    out = []
+    covered = set()
+    for kind in ("conversations", "promises", "wishes"):
+        for item in ledger.get(kind, []):
+            d = delegated(item)
+            if d:
+                back = add_working_hours(parse(d["since"]), d.get("back_after_working_days", BACK_AFTER_WORKING_DAYS) * 24)
+                out.append((back, f"{d.get('to') or 'the team'}: {d.get('ask') or label(item)}"))
+                covered |= sources(item)
+            elif in_progress(item, now):
+                ip = item["in_progress"]
+                out.append((parse(ip["until"]), f"in progress: {ip.get('what') or label(item)}"))
+                covered |= sources(item)
+    for c in ledger.get("conversations", []):
+        if c.get("status") == "open" and not delegated(c) and not in_progress(c, now) and due(c):
+            out.append((due(c), label(c)))
+    for p in ledger.get("promises", []):
+        if p.get("status") == "open" and not delegated(p) and not in_progress(p, now) and parse(p.get("due")):
+            out.append((parse(p["due"]), label(p)))
+            covered |= {p.get("wish"), p.get("source")} - {None, ""}
+    theirs = set().union(*(
+        {c.get("link"), c.get("id")} for c in ledger.get("conversations", [])
+        if c.get("status") == "open" and c.get("ball") == "them"
+    )) - {None, ""}
+    for w in ledger.get("wishes", []):
+        if (w.get("status") == "open" and w.get("priority") == "must-have" and parse(w.get("date"))
+                and not delegated(w) and not in_progress(w, now)
+                and not ({w.get("name"), w.get("source")} & (covered | theirs))):
+            out.append((parse(w["date"]) + dt.timedelta(days=14), f"{w.get('kind', 'feature')} {w.get('name')}"))
+    for w, _ in untold(ledger, now):
+        out.append((add_working_hours(parse(w["shipped_at"]), LATE_HOURS),
+                    f"tell {w.get('reporter') or 'the reporter'} that {w.get('name')} is live"))
+    last = parse(ledger.get("last_contact_at"))
+    upcoming = parse(((ledger.get("meetings") or {}).get("next") or {}).get("at"))
+    if last and not (upcoming and upcoming > now):
+        out.append((last + dt.timedelta(days=7), "plan a touchpoint"))
+    return sorted(out, key=lambda x: x[0])
+
+
 def untold(ledger, now):
     """(wish, working hours since it went live) for each shipped wish nobody told the customer about."""
     out = []
@@ -383,7 +427,10 @@ def main():
     if not core.roost(session):
         print("no roost_url in config.json: wrote note.md only")
         return
-    body = json.dumps({"notes": note})
+    many = len(ledgers) > 1
+    deadlines = [{"at": at.isoformat(), "text": short(((ledger.get("customer") or {}).get("name", slug) + ": " if many else "") + text, 300)}
+                 for slug, ledger in ledgers.items() for at, text in deadline_items(ledger, now)][:300]
+    body = json.dumps({"notes": note, "deadlines": deadlines})
     out = subprocess.run(["curl", "-s", "-o", "/dev/null", "-w", "%{http_code}", "-X", "POST",
                           "-H", "content-type: application/json", "-d", body, core.roost(session)],
                          capture_output=True, text=True)

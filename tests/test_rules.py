@@ -117,6 +117,19 @@ class Note(unittest.TestCase):
 
 
 
+class Deadlines(unittest.TestCase):
+    def test_every_late_thing_has_a_deadline_in_the_past(self):
+        for slug in ("acme-staffing", "northwind-recruiting"):
+            led = ledger(slug)
+            past = [at for at, _ in note.deadline_items(led, NOW) if at < NOW]
+            self.assertEqual(len(past), len(note.late_items(led, NOW)), slug)
+
+    def test_open_items_beyond_the_note_still_get_a_deadline(self):
+        texts = " ".join(t for _, t in note.deadline_items(ledger("acme-staffing"), NOW))
+        self.assertIn("onboarding checklist", texts)
+        self.assertIn("Robin:", texts)
+
+
 class Report(unittest.TestCase):
     def setUp(self):
         import report
