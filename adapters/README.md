@@ -5,6 +5,7 @@
 | [`imap`](imap/ADAPTER.md) | email over IMAP; drafts to your Drafts folder | unit-tested against a fake server |
 | [`ical`](ical/ADAPTER.md) | meetings from a secret iCal address | unit-tested on repeating, moved and cancelled events |
 | [`hubspot`](hubspot/ADAPTER.md) | emails, calls, meetings and notes in HubSpot | untested against a live portal |
+| [`asana`](asana/ADAPTER.md) | one task per open promise and wish, synced both ways | tested on one live project |
 
 To use one, add it to `config.json`: `"adapter": ["adapters/imap"]`, plus its settings (see its
 `ADAPTER.md`). No copying needed.
