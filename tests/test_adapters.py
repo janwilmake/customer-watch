@@ -16,6 +16,7 @@ os.environ.setdefault("CUSTOMER_WATCH_NOW", "2026-11-12T15:00:00Z")
 sys.path.insert(0, ROOT)
 
 import core  # noqa: E402
+import note  # noqa: E402
 
 UTC = dt.timezone.utc
 ACME = core.Customer("acme-staffing", core.load(core.ledger_path("acme-staffing"), {}))
@@ -267,6 +268,30 @@ class Asana(unittest.TestCase):
             self.sync.sync(set())
         self.assertEqual([d["wishes"][0]["status"] for d in self.ledgers.values()], ["shipped", "shipped"])
         api.assert_not_called()
+
+    def test_an_open_item_without_a_task_counts_as_unsynced(self):
+        import adapter as asana_adapter
+        self.ledgers["a"]["promises"][1]["asana"] = "T2"
+        with mock.patch.object(core, "config", return_value=self.cfg), \
+                mock.patch.object(self.sync, "ledgers", return_value={"a": self.ledgers["a"]}):
+            self.assertEqual(asana_adapter.unsynced_count("a"), 1)  # the wish bulk-move has no task
+            self.ledgers["a"]["wishes"][0]["asana"] = "T1"
+            self.assertEqual(asana_adapter.unsynced_count("a"), 0)
+
+
+class NoteUnsynced(unittest.TestCase):
+    def test_the_note_names_items_without_a_task(self):
+        led = {"customer": {"name": "Acme"}}
+        with mock.patch.object(core, "adapter_hook", return_value=[lambda slug: 2]):
+            self.assertIn("Not on the task board yet: 2", note.block("a", led, core.now(), False))
+        with mock.patch.object(core, "adapter_hook", return_value=[lambda slug: 0]):
+            self.assertNotIn("task board", note.block("a", led, core.now(), False))
+
+    def test_a_failing_adapter_does_not_break_the_note(self):
+        def boom(slug):
+            raise RuntimeError("offline")
+        with mock.patch.object(core, "adapter_hook", return_value=[boom]), mock.patch("sys.stderr"):
+            self.assertEqual(note.unsynced_count("a"), 0)
 
 
 if __name__ == "__main__":

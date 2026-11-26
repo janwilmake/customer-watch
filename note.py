@@ -308,6 +308,17 @@ def drafts(ledger):
     return [d for d in ledger.get("drafts") or [] if d.get("status", "open") == "open"]
 
 
+def unsynced_count(slug):
+    """Open items that a task adapter has no task for yet. A failing adapter never breaks the note."""
+    total = 0
+    for count in core.adapter_hook("unsynced_count"):
+        try:
+            total += count(slug)
+        except Exception as e:  # noqa: BLE001
+            sys.stderr.write(f"unsynced_count: {e}\n")
+    return total
+
+
 def block(slug, ledger, now, prefix):
     c = ledger.get("customer", {})
     name = c.get("name", slug)
@@ -338,6 +349,9 @@ def block(slug, ledger, now, prefix):
     ]
     if ledger.get("changed"):
         lines.append(f"Changed: {ledger['changed']}")
+    unsynced = unsynced_count(slug)
+    if unsynced:
+        lines.append(f"Not on the task board yet: {unsynced} (run the task adapter's sync)")
     if late:
         lines += ["Waiting for you:"] + [f"- {i}" for i in late]
     if team:

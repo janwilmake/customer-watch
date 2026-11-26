@@ -86,8 +86,10 @@ On Start and on every full tick, for each listed connector:
 3. Backfill the trust log: `python3 trust.py --backfill 30` (it logs my own sent messages and skips
    what it logged before). Then set each key contact's `trust` facts (Trust layer).
 4. Write `watch.json`, with what the adapter needs.
-5. Run `python3 note.py <session-id> --post`. With Roost, set the title (`Watch: <names>`) and the picture (below).
-6. Arm the gate (below).
+5. Task adapter (such as `adapters/asana`) in `config.json`: run its Tick (below), so the board
+   holds every open item of the backfill.
+6. Run `python3 note.py <session-id> --post`. With Roost, set the title (`Watch: <names>`) and the picture (below).
+7. Arm the gate (below).
 
 ## Roster session
 
@@ -170,22 +172,25 @@ Runs on every gate exit.
 4. Update the ledger: conversations (who has the ball), promises, wishes, meetings,
    `last_contact_at`, `last_message`, new contacts (add their match keys, so the gate finds them
    next time).
-5. Trust: for each item with `"from_me": true`, append a `trust_log` entry (Trust layer). When it
+5. **Task adapter** (such as `adapters/asana`) in `config.json`: on every tick, not only on a full
+   tick, follow its `ADAPTER.md` Tick: push the open items that have no task yet, then sync both
+   ways. The note shows "Not on the task board yet: N" while an item has no task.
+6. Trust: for each item with `"from_me": true`, append a `trust_log` entry (Trust layer). When it
    answers one of the session's open `drafts`, mark that draft `sent`, and log the ask it carried
    (Drafting). When a customer answers an open ask, set its `outcome`. When a wish ships, set
    `shipped_at` and draft the told message at once (Drafting); when someone tells the customer, set
    `told_at` and `told_by`. When a call in `calls_to_make` shows up in the calls, close it and log it.
-6. Update only the standing questions that the new items bear on.
-7. On `full tick due`: refresh usage, `meetings.next` from the calendar, and answer all six
+7. Update only the standing questions that the new items bear on.
+8. On `full tick due`: refresh usage, `meetings.next` from the calendar, and answer all six
    standing questions again (`ADAPTER.md` says where usage comes from). Prepare the next meeting
    when it is within 48 hours (Trust layer). Run `nextstep.py <slug>`: for each contact with
    `call.suggest` and no open call, add one to `calls_to_make` (Calls). In a roster session, refresh `meetings.next` for every
    customer, but usage and the standing questions only for the five customers with the oldest
    `usage.at`, so each tick stays small.
-8. On `roster due (daily)`: follow Roster session → Every day.
-9. Set `changed` to the one most valuable change since the last tick, or `null`. Example:
+9. On `roster due (daily)`: follow Roster session → Every day.
+10. Set `changed` to the one most valuable change since the last tick, or `null`. Example:
    "champion left", "sync coverage fell to 40%", "asked for a price for 5 more seats".
-10. `python3 note.py <session-id> --post`. If the main contact changed, compose the picture again
+11. `python3 note.py <session-id> --post`. If the main contact changed, compose the picture again
    (Picture). Then arm the gate again.
 
 ## Trust layer

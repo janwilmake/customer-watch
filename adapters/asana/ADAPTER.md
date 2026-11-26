@@ -37,7 +37,7 @@ missing is left empty. A customer without an option still gets tasks, with its n
 
 ## Tick
 
-Do this in Tick step 4, after the other ledger updates.
+Do this in the Tick step **Task adapter**, on every tick, not only on a full tick.
 
 1. A `NEW` asana item: read the task with `get_task` (its comments too). A comment can hold a
    question or an answer for the customer: treat it like a teammate's Slack message.

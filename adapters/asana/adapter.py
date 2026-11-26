@@ -3,6 +3,7 @@
 FAST_PROBES   probe_asana: the project's tasks changed since the last probe, fetched once a
               minute for every gate on this Mac (core.shared_feed). Our own writes are skipped:
               sync.py records the modified_at of every task it writes in <home>/asana.json.
+unsynced_count  the open items of a customer that have no task yet; note.py shows the number.
 """
 import os
 import sys
@@ -54,6 +55,13 @@ def probe_asana(st, customers, ctx):
                 "section": r.get("section"), "completed": r.get("completed"), "assignee": r.get("assignee"),
                 "link": r.get("url"), "new": not known}))
     return hits
+
+
+def unsynced_count(slug):
+    """Open items of this customer that have no Asana task yet. Reads the ledgers only, no API call."""
+    if not (core.config().get("asana") or {}).get("project"):
+        return 0
+    return len(sync.plan_rows(sync.items(sync.ledgers({slug}))))
 
 
 FAST_PROBES = [probe_asana]
