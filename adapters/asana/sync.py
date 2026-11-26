@@ -40,7 +40,7 @@ def settings():
 def api(tool, args):
     d = call(settings()["server"], tool, args, timeout=120)
     if not isinstance(d, dict):
-        sys.exit(f"asana {tool} failed: {str(d)[:300]}")
+        sys.exit(f"asana {tool} failed: {str(d)[:300]} (an expired token? one Asana MCP call from a Claude Code session refreshes it, then run this again)")
     return d
 
 
