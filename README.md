@@ -94,6 +94,7 @@ Pick per channel. Mix freely: `"adapter": ["adapters/imap", "adapters/ical"]`.
 | Email | [`adapters/imap`](adapters/imap/ADAPTER.md) | an app password (Gmail, Microsoft 365, Fastmail, iCloud) | within a minute; drafts go to your own Drafts folder |
 | Meetings | [`adapters/ical`](adapters/ical/ADAPTER.md) | your calendar's secret iCal address (Google, Outlook) | within minutes; repeating and moved meetings included |
 | Email, calls, meetings, notes | [`adapters/hubspot`](adapters/hubspot/ADAPTER.md) (untested, PRs welcome) | a HubSpot private app token | within a minute |
+| Tasks for the team | [`adapters/asana`](adapters/asana/ADAPTER.md) | the Asana MCP server, signed in | one task per open promise and wish; a teammate's change wakes the session within a minute |
 | Support chat | built in | Intercom's MCP server | within a minute |
 | Team and Slack Connect channels | built in | Slack's MCP server | within a minute |
 | Releases | built in | the `gh` CLI, and the PR links on a wish | within 5 minutes of the merge |

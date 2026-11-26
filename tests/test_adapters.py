@@ -16,6 +16,7 @@ os.environ.setdefault("CUSTOMER_WATCH_NOW", "2026-11-12T15:00:00Z")
 sys.path.insert(0, ROOT)
 
 import core  # noqa: E402
+import note  # noqa: E402
 
 UTC = dt.timezone.utc
 ACME = core.Customer("acme-staffing", core.load(core.ledger_path("acme-staffing"), {}))
@@ -218,6 +219,79 @@ class Releases(unittest.TestCase):
         self.assertEqual(run.call_count, 1)  # the non-url is skipped
         self.assertEqual(hits[0][1], "release")
         self.assertEqual(hits[0][3]["wish"], "inmail-templates")
+
+
+class Asana(unittest.TestCase):
+    """One task per open item; a shared wish is one task; a teammate's move closes the item."""
+
+    def setUp(self):
+        sys.path.insert(0, os.path.join(ROOT, "adapters", "asana"))
+        import sync
+        self.sync = sync
+        self.cfg = {**core.DEFAULTS, "asana": {
+            "project": "P", "sections": {"open": "New", "in_progress": "Doing", "told": "Told", "done": "Done"},
+            "fields": {"customer": "Klant", "type": "Type"}, "type_options": {"feature": "Feature request", "promise": "Issue"},
+            "customers": {"a": "Acme", "b": "Beta"}}}
+        self.meta = {"sections": {"New": "s1", "Doing": "s2", "Told": "s3", "Done": "s4"},
+                     "fields": {"Klant": {"gid": "fk", "options": {"Acme": "oa", "Beta": "ob"}},
+                                "Type": {"gid": "ft", "options": {"Feature request": "of", "Issue": "oi"}}}}
+        self.ledgers = {
+            "a": {"customer": {"name": "Acme"}, "wishes": [{"name": "bulk-move", "kind": "feature", "status": "open"}],
+                  "promises": [{"what": "ship bulk move", "wish": "bulk-move", "due": "2026-11-20T17:00:00+01:00", "status": "open"},
+                               {"what": "call Tom", "status": "open"}]},
+            "b": {"customer": {"name": "Beta"}, "wishes": [{"name": "bulk-move", "kind": "feature", "status": "open"}]}}
+
+    def test_a_shared_wish_is_one_item_with_both_customers(self):
+        with mock.patch.object(core, "config", return_value=self.cfg):
+            its = self.sync.items(self.ledgers)
+            self.assertEqual(sorted(its), ["p:a:" + self.sync.hashlib.sha1(b"call Tom").hexdigest()[:10], "w:bulk-move"])
+            wish = its["w:bulk-move"]
+            self.assertEqual(self.sync.due_of(wish), "2026-11-20")
+            self.assertEqual(self.sync.field_map(wish, self.meta), {"fk": ["oa", "ob"], "ft": ["of"]})
+            self.assertEqual(self.sync.label(wish), "Acme + Beta")
+
+    def test_a_task_moved_to_done_closes_the_wish_for_every_customer(self):
+        for d in self.ledgers.values():
+            d["wishes"][0]["asana"] = "T1"
+        task = {"gid": "T1", "completed": True, "due_on": "2026-11-20", "modified_at": "2026-11-21T10:00:00.000Z",
+                "memberships": [{"project": {"gid": "P"}, "section": {"name": "Done"}}],
+                "custom_fields": [{"gid": "fk", "display_value": "Acme, Beta"}]}
+        index = {"tasks": {"T1": {"key": "w:bulk-move", "section": "New"}}}
+        saved = {}
+        with mock.patch.object(core, "config", return_value=self.cfg), \
+                mock.patch.object(self.sync, "project_meta", return_value=self.meta), \
+                mock.patch.object(self.sync, "ledgers", return_value=self.ledgers), \
+                mock.patch.object(self.sync, "tasks", return_value=[task]), \
+                mock.patch.object(self.sync, "load", return_value=index), \
+                mock.patch.object(self.sync, "save", side_effect=lambda p, d: saved.__setitem__(p, d)), \
+                mock.patch.object(self.sync, "api") as api, mock.patch("builtins.print"):
+            self.sync.sync(set())
+        self.assertEqual([d["wishes"][0]["status"] for d in self.ledgers.values()], ["shipped", "shipped"])
+        api.assert_not_called()
+
+    def test_an_open_item_without_a_task_counts_as_unsynced(self):
+        import adapter as asana_adapter
+        self.ledgers["a"]["promises"][1]["asana"] = "T2"
+        with mock.patch.object(core, "config", return_value=self.cfg), \
+                mock.patch.object(self.sync, "ledgers", return_value={"a": self.ledgers["a"]}):
+            self.assertEqual(asana_adapter.unsynced_count("a"), 1)  # the wish bulk-move has no task
+            self.ledgers["a"]["wishes"][0]["asana"] = "T1"
+            self.assertEqual(asana_adapter.unsynced_count("a"), 0)
+
+
+class NoteUnsynced(unittest.TestCase):
+    def test_the_note_names_items_without_a_task(self):
+        led = {"customer": {"name": "Acme"}}
+        with mock.patch.object(core, "adapter_hook", return_value=[lambda slug: 2]):
+            self.assertIn("Not on the task board yet: 2", note.block("a", led, core.now(), False))
+        with mock.patch.object(core, "adapter_hook", return_value=[lambda slug: 0]):
+            self.assertNotIn("task board", note.block("a", led, core.now(), False))
+
+    def test_a_failing_adapter_does_not_break_the_note(self):
+        def boom(slug):
+            raise RuntimeError("offline")
+        with mock.patch.object(core, "adapter_hook", return_value=[boom]), mock.patch("sys.stderr"):
+            self.assertEqual(note.unsynced_count("a"), 0)
 
 
 if __name__ == "__main__":
