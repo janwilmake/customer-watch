@@ -207,7 +207,9 @@ wake. It exits quietly when the session is gone.
 
 **`WAKE … credential error: <server>`:** the stored token of that MCP server has expired. The gate
 reads tokens but cannot refresh them; Claude Code can. Make one cheap read call to that server from
-this session (Asana: `get_me`), then re-arm the gate. When that call fails too, ask the user to run
+this session (Asana: `get_me`), then re-arm the gate. When this session has no tools of that server
+(it started before the server was added), SendMessage another watch session to make the call, and
+ask the user to restart this one. When that call fails too, ask the user to run
 `claude mcp login <server>`. One gate on this Mac wakes for this, at most once per 30 minutes.
 
 ## Tick
