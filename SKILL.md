@@ -149,9 +149,18 @@ python3 ~/.claude/skills/customer-watch/gate.py <session-id> --wait
 It runs the core probes (Intercom, the Slack team and customer channels, the replies to
 handed-over items) and the adapter's fast probes every 60 s, and the adapter's slow probes
 (meetings, calls) every 5 min. It re-renders the Roost note every 15 min, so Late grows with time
-alone. It exits — and wakes you — on a new item, when the 6-hour full tick is due, or after 4 idle
-hours. Its output: `NEW {json}` lines, then one `WAKE` line. An item with `"from_me": true` is a
+alone. It exits — and wakes you — on a new item, or when the 6-hour full tick is due. Its output: `NEW {json}` lines, then one `WAKE` line. An item with `"from_me": true` is a
 message I sent myself.
+
+**`NEW` with `"channel": "watch"`:** another watch session's gate has not probed since `since`.
+`"state": "stalled"`: its session lives but stopped (a network error, say). SendMessage to its
+`socket`: "Your customer-watch gate is not running since <since>. Catch up, then re-arm it (pgrep
+first, then gate.py <session-id> --wait with run_in_background)." `"state": "gone"`: no process is
+left. Tell the user in one line which watch to restart (`name`, `session`). One gate on this Mac
+checks every 10 minutes and reports a stalled watch once, a gone one once a day.
+
+After 4 idle hours the gate checks that its own session still lives, and keeps probing without a
+wake. It exits quietly when the session is gone.
 
 **`WAKE … credential error: <server>`:** the stored token of that MCP server has expired. The gate
 reads tokens but cannot refresh them; Claude Code can. Make one cheap read call to that server from
@@ -165,11 +174,14 @@ Runs on every gate exit.
 1. For each `NEW` item, read the full content with the source's own read tools. The gate matches
    broadly. Drop an item that is not about the customer, for example "makes sense" in Slack for a
    customer called Sense.
-2. For a `NEW` item with `"channel": "release"`: a pull request linked to a wish merged. Check that
-   it is live (for example: the deploy after the merge finished, as your release process says).
-   Then set the wish `shipped` with `shipped_at`, and draft the told message to the reporter at once
-   (Drafting). When the wish gets a ticket or a pull request, add its link to `ticket` or `prs`, so
-   the gate sees the release.
+2. For a `NEW` item with `"channel": "release"`: a pull request in a wish's `prs` merged, or its
+   `ticket` reached a shipped status (`adapters/linear`). Check that it is live (for example: the
+   deploy after the merge finished, as your release process says). Then set the wish `shipped` with
+   `shipped_at`, and draft the told message to the reporter at once (Drafting).
+   **Every ticket or pull request you create or find for a wish goes into that wish at once**
+   (`"ticket": "<id>"`, `"tickets": [...]`, `"prs": [...]`). Without it, the release wakes nobody and
+   the customer is never told. A shipped wish without `shipped_at` counts as Late until it is told;
+   when telling is not needed (for example an old fix), set `told_at` with `"told_by": "not needed"`.
 3. For a `NEW` item with `"channel": "delegation"`: the teammate replied. Read the reply, then
    decide: the next step is ours again (remove `delegated`; the item counts as Late or Waiting for
    us again), the item is done (`status: done`), or the teammate needs more time (set

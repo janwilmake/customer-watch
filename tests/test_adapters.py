@@ -318,3 +318,65 @@ class CredentialWake(unittest.TestCase):
             self.assertTrue(core.claim_credential_wake("intercom"))
             with mock.patch("time.time", return_value=core.time.time() + core.CREDENTIAL_QUIET + 1):
                 self.assertTrue(core.claim_credential_wake("asana"))
+
+
+class Watchdog(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        root = self.tmp.name
+        self.home, self.agents = os.path.join(root, "home"), os.path.join(root, "agents")
+        for sid in ("me", "stalled", "gone", "fine"):
+            os.makedirs(os.path.join(self.home, "sessions", sid))
+            core.save(os.path.join(self.home, "sessions", sid, "watch.json"), {"slugs": []})
+            core.save(os.path.join(self.home, "sessions", sid, "state.json"), {})
+        old = core.time.time() - core.DOWN_AFTER - 60
+        for sid in ("stalled", "gone"):
+            os.utime(os.path.join(self.home, "sessions", sid, "state.json"), (old, old))
+        os.makedirs(self.agents)
+        core.save(os.path.join(self.agents, "1.json"), {"sessionId": "stalled", "pid": os.getpid(), "name": "w-1"})
+        core.save(os.path.join(self.agents, "2.json"), {"sessionId": "gone", "pid": 999999, "name": "w-2"})
+        self.patches = [mock.patch.object(core, "HOME", self.home), mock.patch.object(core, "CACHE", os.path.join(self.home, "cache")),
+                        mock.patch.object(core, "AGENT_SESSIONS", self.agents)]
+        for p in self.patches:
+            p.start()
+
+    def tearDown(self):
+        for p in self.patches:
+            p.stop()
+        self.tmp.cleanup()
+
+    def test_a_watch_whose_gate_stopped_is_reported_once(self):
+        down = {d["session"]: d for d in core.down_watches("me")}
+        self.assertEqual(set(down), {"stalled", "gone"})
+        self.assertEqual(down["stalled"]["state"], "stalled")
+        self.assertEqual(down["stalled"]["socket"], f"uds:/tmp/cc-socks/{os.getpid()}.sock")
+        self.assertEqual(down["gone"]["state"], "gone")
+        self.assertEqual(core.down_watches("me"), [])  # one check per WATCHDOG_EVERY for all gates
+        with mock.patch("time.time", return_value=core.time.time() + core.WATCHDOG_EVERY + 1):
+            self.assertEqual(core.down_watches("me"), [])  # the same down spell is not reported again
+
+    def test_the_session_of_a_gate_is_found_with_its_process(self):
+        self.assertTrue(core.agent_session("stalled")["alive"])
+        self.assertFalse(core.agent_session("gone")["alive"])
+        self.assertIsNone(core.agent_session("nobody"))
+
+
+class LinearTickets(unittest.TestCase):
+    def test_an_open_wish_whose_ticket_is_done_is_a_release(self):
+        mod = load("linear")
+        led = {"wishes": [{"name": "csv-export", "status": "open", "ticket": "https://linear.app/x/issue/ABC-12/csv"},
+                          {"name": "dark-mode", "status": "open", "tickets": ["ABC-13"]}]}
+        rows = [{"id": "ABC-12", "status": "Done", "completedAt": "2026-11-12T10:00:00Z", "url": "u"},
+                {"id": "ABC-13", "status": "In review", "updatedAt": "2026-11-12T10:00:00Z"}]
+        cfg = {**core.DEFAULTS, "linear": {"team": "X"}}
+        with mock.patch.object(core, "config", return_value=cfg), mock.patch.object(core, "shared_feed", return_value=(rows, {})), \
+                mock.patch.object(core, "load", return_value=led):
+            hits = mod.probe_tickets({}, [ACME], {})
+        self.assertEqual([(h[0], h[1], h[2]) for h in hits], [("acme-staffing", "release", "csv-export:ABC-12")])
+
+    def test_a_shipped_wish_without_a_date_is_late_until_told(self):
+        led = {"wishes": [{"name": "old-fix", "status": "shipped", "reporter": "Jo"}]}
+        late = " ".join(note.late_items(led, core.now()))
+        self.assertIn("date unknown, not told", late)
+        led["wishes"][0].update({"told_at": "2026-11-12T10:00:00Z", "told_by": "not needed"})
+        self.assertNotIn("old-fix", " ".join(note.late_items(led, core.now())))

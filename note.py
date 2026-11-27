@@ -205,7 +205,9 @@ def late_items(ledger, now):
                 and parse(w.get("date")) and now > wish_due(w)):
             items.append(f"(late: open since {when(w['date'])[:10].rstrip()}) {w.get('kind', 'feature')} {w.get('name')}")
     for w, hours in untold(ledger, now):
-        if now > tell_by(parse(w["shipped_at"])):
+        if hours is None:
+            items.append(f"(late: live, date unknown, not told) tell {w.get('reporter') or 'the reporter'} yourself: {w.get('name')}")
+        elif now > tell_by(parse(w["shipped_at"])):
             items.append(f"(late: live since {when(w['shipped_at'])}, not told) tell {w.get('reporter') or 'the reporter'} yourself: {w.get('name')}")
     last = parse(ledger.get("last_contact_at"))
     upcoming = parse(((ledger.get("meetings") or {}).get("next") or {}).get("at"))
@@ -247,8 +249,8 @@ def deadline_items(ledger, now):
                 and not delegated(w) and not in_progress(w, now)
                 and not ({w.get("name"), w.get("source")} & (covered | theirs))):
             out.append((wish_due(w), f"{w.get('kind', 'feature')} {w.get('name')}"))
-    for w, _ in untold(ledger, now):
-        out.append((tell_by(parse(w["shipped_at"])),
+    for w, hours in untold(ledger, now):
+        out.append((tell_by(parse(w["shipped_at"])) if hours is not None else now,
                     f"tell {w.get('reporter') or 'the reporter'} that {w.get('name')} is live"))
     last = parse(ledger.get("last_contact_at"))
     upcoming = parse(((ledger.get("meetings") or {}).get("next") or {}).get("at"))
@@ -261,9 +263,11 @@ def untold(ledger, now):
     """(wish, working hours since it went live) for each shipped wish nobody told the customer about."""
     out = []
     for w in ledger.get("wishes", []):
-        if w.get("status") == "shipped" and parse(w.get("shipped_at")) and not w.get("told_at") \
+        # A shipped wish without shipped_at still waits to be told: it is late, since nobody knows how long.
+        if w.get("status") == "shipped" and not w.get("told_at") \
                 and not delegated({**w, "status": "open"}) and not in_progress({**w, "status": "open"}, now):
-            out.append((w, working_hours(parse(w["shipped_at"]), now)))
+            shipped = parse(w.get("shipped_at"))
+            out.append((w, working_hours(shipped, now) if shipped else None))
     return out
 
 
@@ -283,7 +287,7 @@ def trust_moves(ledger, now):
     import nextstep
     moves = []
     for w, hours in untold(ledger, now):
-        if now <= tell_by(parse(w["shipped_at"])):
+        if hours is not None and now <= tell_by(parse(w["shipped_at"])):
             moves.append(f"tell {w.get('reporter') or 'the reporter'} yourself that {w.get('name')} is live (a short video works best)")
     every = ME.get("touch_every_days", 21)
     for st in nextstep.contact_steps(ledger, now):
