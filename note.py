@@ -310,7 +310,22 @@ def calls(ledger):
 
 
 def drafts(ledger):
-    return [d for d in ledger.get("drafts") or [] if d.get("status", "open") == "open"]
+    """Open drafts. A draft with `sent: true` or a `sent_at` is sent, whatever its status says."""
+    return [d for d in ledger.get("drafts") or []
+            if d.get("status", "open") == "open" and not d.get("sent") and not d.get("sent_at")]
+
+
+def short_text(text, n):
+    text = " ".join(str(text).split())
+    return text if len(text) <= n else text[:n - 1] + "…"
+
+
+def draft_line(d):
+    """Who, what and where of a draft. Older drafts name these `to`, `what` or `subject`, and `url` or `where`."""
+    who = d.get("contact") or d.get("to") or "a draft"
+    what = d.get("step") or d.get("what") or d.get("subject")
+    where = d.get("link") or d.get("url") or d.get("where")
+    return who, " · ".join(x for x in (what and short_text(what, 70), where) if x)
 
 
 def unsynced_count(slug):
@@ -376,7 +391,7 @@ def block(slug, ledger, now, prefix):
                 lines += [f"  · {n}" for n in (c.get("notes") or [])[:4]]
     ready = drafts(ledger)
     if ready:
-        lines += ["Drafts ready:"] + [f"- {d.get('contact')} ({d.get('channel')}): {d.get('link')}" for d in ready[:3]]
+        lines += ["Drafts ready:"] + [f"- {draft_line(d)[0]} ({d.get('channel') or 'draft'}): {draft_line(d)[1]}" for d in ready[:3]]
     moves = trust_moves(ledger, now)
     if moves:
         lines += ["Trust:"] + [f"- {m}" for m in moves[:3]]

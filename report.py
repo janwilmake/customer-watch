@@ -124,7 +124,8 @@ def daily():
         out.append("\n**Drafts to send**")
         for s, d in drafts[:8]:
             age = (NOW - parse(d["at"])).days if parse(d.get("at")) else 0
-            out.append(f"• {d.get('contact')} ({name(s, leds[s])}, {d.get('channel')}, {age} d): {d.get('link')}")
+            who, what = note.draft_line(d)
+            out.append(f"• {who} ({name(s, leds[s])}, {d.get('channel') or 'draft'}, {age} d): {what}")
     if soon:
         out.append("\n**Meetings in the next 36 hours**")
         for at, s, m in sorted(soon, key=lambda r: r[0]):
