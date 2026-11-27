@@ -61,8 +61,8 @@ Do this in the Tick step **Task adapter**, on every tick, not only on a full tic
 **`asana … failed` from `sync.py`:** the Asana access token lasts about an hour, and the shell
 (`agent-codemode`) only reads it; Claude Code alone refreshes it. Make one Asana call from the
 session (`get_me` on the Asana MCP server): that refreshes the token. Then run the `sync.py` step
-again. The gate's Asana probe fails the same way while the token is expired; the next tick catches
-up.
+again. When the gate's Asana probe meets an expired token, it wakes one session on this Mac with
+`credential error: asana`, and that session makes the refresh call.
 
 A task that the script cannot find (`gone:` in its output) was deleted or moved out of the
 project: ask the user before you remove the `asana` id from the item.

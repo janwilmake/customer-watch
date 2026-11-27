@@ -250,6 +250,7 @@ def main():
         if time.time() - st["last_slow"] >= SLOW_EVERY:
             probes += slow
             st["last_slow"] = time.time()
+        core.CREDENTIAL_ERRORS.clear()
         with concurrent.futures.ThreadPoolExecutor(max(1, len(probes))) as pool:
             results = list(pool.map(lambda p: p(st, customers, ctx), probes))
         new = []
@@ -265,9 +266,12 @@ def main():
             new = []
             st["baselined"] = True
 
+        expired = sorted(s for s in core.CREDENTIAL_ERRORS if core.claim_credential_wake(s))
         reason = None
         if new:
-            reason = f"{len(new)} new item(s)"
+            reason = f"{len(new)} new item(s)" + (f"; credential error: {', '.join(expired)}" if expired else "")
+        elif expired:
+            reason = f"credential error: {', '.join(expired)}"
         elif roster_due(watch):
             reason = "roster due (daily)"
         elif time.time() - st["last_full"] >= FULL_EVERY:
