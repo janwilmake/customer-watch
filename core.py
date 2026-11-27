@@ -249,6 +249,83 @@ def claim_credential_wake(server):
         return True
 
 
+AGENT_SESSIONS = os.path.expanduser(os.environ.get("CUSTOMER_WATCH_AGENT_SESSIONS", "~/.claude/sessions"))
+AGENT_PROJECTS = os.path.expanduser(os.environ.get("CUSTOMER_WATCH_AGENT_PROJECTS", "~/.claude/projects"))
+DOWN_AFTER = 30 * 60      # a watch whose gate has not probed this long is down
+WATCHDOG_EVERY = 10 * 60  # one gate on this Mac checks the other watches this often
+REPORT_GONE_EVERY = 24 * 3600
+
+
+def agent_session(session):
+    """{"pid", "name", "alive"} of the Claude Code process of a session, or None when not found."""
+    import glob
+    for path in glob.glob(os.path.join(AGENT_SESSIONS, "*.json")):
+        d = load(path, {})
+        if d.get("sessionId") == session and d.get("pid"):
+            try:
+                os.kill(int(d["pid"]), 0)
+                alive = True
+            except OSError:
+                alive = False
+            return {"pid": d["pid"], "name": d.get("name"), "alive": alive}
+    return None
+
+
+def transcript_age(session):
+    """When the session's transcript was last written (epoch seconds), or 0 when it is not found."""
+    import glob
+    paths = glob.glob(os.path.join(AGENT_PROJECTS, "*", session + ".jsonl"))
+    return max((os.path.getmtime(p) for p in paths), default=0)
+
+
+def pid_alive(pid):
+    try:
+        os.kill(int(pid), 0)
+        return True
+    except (OSError, TypeError, ValueError):
+        return False
+
+
+def down_watches(me):
+    """The other watch sessions whose gate stopped probing, at most once a WATCHDOG_EVERY for all gates.
+
+    A gate saves state.json on every probe, so its age is the heartbeat. A stalled session (its process
+    lives) is reported once per down spell; a gone one (no process) once a day.
+    """
+    with locked("watchdog") as path:
+        mark = load(path, {})
+        if time.time() - mark.get("checked", 0) < WATCHDOG_EVERY:
+            return []
+        mark["checked"] = time.time()
+        reported = mark.setdefault("reported", {})
+        out = []
+        for sid in sorted(os.listdir(os.path.join(HOME, "sessions")) if os.path.isdir(os.path.join(HOME, "sessions")) else []):
+            sdir = os.path.join(HOME, "sessions", sid)
+            if sid == me or not os.path.exists(os.path.join(sdir, "watch.json")):
+                continue
+            if pid_alive(load(os.path.join(sdir, "gate.pid"), None)):
+                continue
+            try:
+                beat = os.path.getmtime(os.path.join(sdir, "state.json"))
+            except OSError:
+                continue
+            if time.time() - beat < DOWN_AFTER:
+                continue
+            agent = agent_session(sid) or {}
+            if agent.get("alive") and time.time() - transcript_age(sid) < DOWN_AFTER:
+                continue  # a long turn: the session works and re-arms its gate after it
+            state = "stalled" if agent.get("alive") else "gone"
+            since = iso(dt.datetime.fromtimestamp(beat, dt.timezone.utc))
+            last = reported.get(sid) or {}
+            if last.get("since") == since and (state == "stalled" or time.time() - last.get("at", 0) < REPORT_GONE_EVERY):
+                continue
+            reported[sid] = {"since": since, "at": time.time()}
+            out.append({"session": sid, "name": agent.get("name"), "state": state, "since": since,
+                        "socket": f"uds:/tmp/cc-socks/{agent['pid']}.sock" if agent.get("alive") else None})
+        save(path, mark)
+        return out
+
+
 LOOKBACK = dt.timedelta(hours=1)  # a message reaches the system of record minutes after its own timestamp
 KEEP = dt.timedelta(hours=3)      # how long a fetched row stays in the shared feed for every gate to match
 FEED_EVERY = 55

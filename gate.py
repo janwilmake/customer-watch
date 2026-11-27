@@ -27,7 +27,7 @@ FAST_EVERY = 60          # email, chat, Intercom, Slack
 SLOW_EVERY = 300         # meetings and calls: transcripts arrive minutes after the end
 FULL_EVERY = core.config().get("full_tick_hours", 6) * 3600  # the full tick: usage, connectors, questions
 NOTE_EVERY = 900         # re-render the Roost note, so Late grows with time alone
-GIVE_UP = 4 * 3600       # exit with WAKE idle, so a hung gate never lasts forever
+GIVE_UP = 4 * 3600       # after this long idle, a gate checks that its session still lives
 ROSTER_HOUR = 7          # a roster session rebuilds its customer set once a day, from this local hour
 SEEN_MAX = 5000
 
@@ -198,6 +198,12 @@ def probe_releases(st, customers, ctx):
     return hits
 
 
+def probe_watch(st, customers, ctx):
+    """Other watch sessions whose gate stopped (for example after a network error stalled the session)."""
+    return [("(watch)", "watch", f"{d['session']}:{d['since']}", {"at": d["since"], **d})
+            for d in core.down_watches(ctx["session"])]
+
+
 def render_note(session):
     subprocess.run([sys.executable, os.path.join(SKILL, "note.py"), session, "--post"],
                    capture_output=True, timeout=60)
@@ -222,11 +228,11 @@ def main():
     if mode == "--wait":
         save(pidfile, os.getpid())
 
-    fast = [probe_intercom, probe_customer_slack, probe_delegations]
+    fast = [probe_intercom, probe_customer_slack, probe_delegations, probe_watch]
     if (core.config().get("slack") or {}).get("team_channels"):
         fast.append(probe_team_slack)
     if not slack_server():
-        fast = [p for p in fast if p is probe_intercom]
+        fast = [p for p in fast if p in (probe_intercom, probe_watch)]
     mods = core.adapters()
     fast += [p for m in mods for p in getattr(m, "FAST_PROBES", [])]
     slow = [probe_releases] + [p for m in mods for p in getattr(m, "SLOW_PROBES", [])]
@@ -279,7 +285,18 @@ def main():
         elif mode == "--once":
             reason = "nothing new"
         elif time.time() - began >= GIVE_UP:
-            reason = "idle; re-arm the gate"
+            # A live session needs no model turn to keep its gate; only an unknown one gets the old wake.
+            agent = core.agent_session(session)
+            if agent and agent["alive"]:
+                began = time.time()
+            elif agent:  # the session is gone, so nobody reads a wake; the watchdog of another gate reports it
+                try:
+                    os.remove(pidfile)
+                except OSError:
+                    pass
+                return
+            else:
+                reason = "idle; re-arm the gate"
         if reason and reason.startswith("full"):
             st["last_full"] = time.time()
         save(state_path, st)
