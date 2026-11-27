@@ -40,6 +40,7 @@ DEFAULTS = {
     "intercom": None,             # {"server"}
     "roster_about": "About: {n} customers without a session of their own.",
     "late_after_working_hours": 24,
+    "tell_after_working_hours": 24,  # a fix live this long without telling the reporter is Late
 }
 
 
