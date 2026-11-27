@@ -20,6 +20,7 @@ AMS = core.tz()  # the user's own timezone, from config.json
 CFG = core.config()
 ME = core.me()
 LATE_HOURS = CFG["late_after_working_hours"]
+TELL_HOURS = CFG["tell_after_working_hours"]
 
 
 def parse(value):
@@ -79,6 +80,10 @@ def end_of_working_day(t):
 
 def reply_by(since):
     return end_of_working_day(add_working_hours(since, LATE_HOURS))
+
+
+def tell_by(shipped):
+    return end_of_working_day(add_working_hours(shipped, TELL_HOURS))
 
 
 def back_by(d):
@@ -200,7 +205,7 @@ def late_items(ledger, now):
                 and parse(w.get("date")) and now > wish_due(w)):
             items.append(f"(late: open since {when(w['date'])[:10].rstrip()}) {w.get('kind', 'feature')} {w.get('name')}")
     for w, hours in untold(ledger, now):
-        if now > reply_by(parse(w["shipped_at"])):
+        if now > tell_by(parse(w["shipped_at"])):
             items.append(f"(late: live since {when(w['shipped_at'])}, not told) tell {w.get('reporter') or 'the reporter'} yourself: {w.get('name')}")
     last = parse(ledger.get("last_contact_at"))
     upcoming = parse(((ledger.get("meetings") or {}).get("next") or {}).get("at"))
@@ -243,7 +248,7 @@ def deadline_items(ledger, now):
                 and not ({w.get("name"), w.get("source")} & (covered | theirs))):
             out.append((wish_due(w), f"{w.get('kind', 'feature')} {w.get('name')}"))
     for w, _ in untold(ledger, now):
-        out.append((reply_by(parse(w["shipped_at"])),
+        out.append((tell_by(parse(w["shipped_at"])),
                     f"tell {w.get('reporter') or 'the reporter'} that {w.get('name')} is live"))
     last = parse(ledger.get("last_contact_at"))
     upcoming = parse(((ledger.get("meetings") or {}).get("next") or {}).get("at"))
@@ -278,7 +283,7 @@ def trust_moves(ledger, now):
     import nextstep
     moves = []
     for w, hours in untold(ledger, now):
-        if now <= reply_by(parse(w["shipped_at"])):
+        if now <= tell_by(parse(w["shipped_at"])):
             moves.append(f"tell {w.get('reporter') or 'the reporter'} yourself that {w.get('name')} is live (a short video works best)")
     every = ME.get("touch_every_days", 21)
     for st in nextstep.contact_steps(ledger, now):

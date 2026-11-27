@@ -29,6 +29,16 @@ def step(led, name):
 
 
 class Late(unittest.TestCase):
+    def test_a_fix_left_untold_keeps_its_own_deadline_when_the_reply_limit_grows(self):
+        led = {"wishes": [{"name": "export-fix", "status": "shipped", "shipped_at": "2026-11-10T09:00:00Z",
+                           "reporter": "Jo"}],
+               "conversations": [{"status": "open", "ball": "us", "waiting_since": "2026-11-10T09:00:00Z",
+                                  "subject": "a question"}]}
+        with mock.patch.object(note, "LATE_HOURS", 72), mock.patch.object(note, "TELL_HOURS", 24):
+            late = " ".join(note.late_items(led, NOW))
+        self.assertIn("not told", late)
+        self.assertNotIn("no reply", late)
+
     def test_acme_has_three_late_things(self):
         late = note.late_items(ledger("acme-staffing"), NOW)
         self.assertEqual(len(late), 3, late)

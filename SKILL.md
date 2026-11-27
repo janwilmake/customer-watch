@@ -217,7 +217,7 @@ tracks mine: does this person know me, and what is my next personal move? It fol
 - **Told loop.** A wish that ships gets `"status": "shipped"`, `"shipped_at"` and, when known,
   `"reporter"` (the contact who asked). `note.py` lists "tell the reporter yourself" as a trust move
   on the day it goes live, and counts it as Late once it has gone untold for longer than
-  `late_after_working_hours`. Telling them sets `told_at`, `told_by` and a `told` log entry when I
+  `tell_after_working_hours` (default 24). Telling them sets `told_at`, `told_by` and a `told` log entry when I
   told them myself.
 - **Trust moves in the note.** `note.py` writes a `Trust:` section (one line in a roster note),
   outside the badge: untold fixes first, then each key contact (`me.json` → `trust_roles`) with
