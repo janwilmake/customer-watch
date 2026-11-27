@@ -159,6 +159,11 @@ def iso(t):
     return t.strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+# Servers whose stored token has expired. Only Claude Code refreshes a token, so the gate wakes a session.
+CREDENTIAL_ERRORS = set()
+CREDENTIAL_QUIET = 30 * 60  # one wake per server for all gates on this Mac in this time
+
+
 def call(server, tool, args, timeout=90):
     """One MCP call through agent-codemode. Returns parsed JSON, the raw text, or None on failure."""
     try:
@@ -170,6 +175,8 @@ def call(server, tool, args, timeout=90):
         return None
     if out.returncode != 0:
         sys.stderr.write(f"{tool}: exit {out.returncode}: {out.stderr.strip()[:200]}\n")
+        if "credential error" in out.stderr:
+            CREDENTIAL_ERRORS.add(server)
         return None
     try:
         return json.loads(out.stdout)
@@ -230,6 +237,15 @@ def locked(name):
     with open(os.path.join(CACHE, name + ".lock"), "w") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
         yield os.path.join(CACHE, name + ".json")
+
+
+def claim_credential_wake(server):
+    """True for the first gate on this Mac to report this server's expired token in CREDENTIAL_QUIET."""
+    with locked("credential-" + server) as path:
+        if time.time() - load(path, {}).get("at", 0) < CREDENTIAL_QUIET:
+            return False
+        save(path, {"at": time.time()})
+        return True
 
 
 LOOKBACK = dt.timedelta(hours=1)  # a message reaches the system of record minutes after its own timestamp

@@ -153,6 +153,11 @@ alone. It exits — and wakes you — on a new item, when the 6-hour full tick i
 hours. Its output: `NEW {json}` lines, then one `WAKE` line. An item with `"from_me": true` is a
 message I sent myself.
 
+**`WAKE … credential error: <server>`:** the stored token of that MCP server has expired. The gate
+reads tokens but cannot refresh them; Claude Code can. Make one cheap read call to that server from
+this session (Asana: `get_me`), then re-arm the gate. When that call fails too, ask the user to run
+`claude mcp login <server>`. One gate on this Mac wakes for this, at most once per 30 minutes.
+
 ## Tick
 
 Runs on every gate exit.

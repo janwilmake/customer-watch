@@ -296,3 +296,25 @@ class NoteUnsynced(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class CredentialWake(unittest.TestCase):
+    def test_an_expired_token_is_recorded_per_server(self):
+        failed = mock.Mock(returncode=1, stdout="", stderr='credential error: The stored access token for "asana" has expired.')
+        core.CREDENTIAL_ERRORS.clear()
+        with mock.patch("subprocess.run", return_value=failed), mock.patch("sys.stderr"):
+            self.assertIsNone(core.call("asana", "get_tasks", {}))
+        self.assertEqual(core.CREDENTIAL_ERRORS, {"asana"})
+        other = mock.Mock(returncode=1, stdout="", stderr="error: fetch failed")
+        core.CREDENTIAL_ERRORS.clear()
+        with mock.patch("subprocess.run", return_value=other), mock.patch("sys.stderr"):
+            core.call("intercom", "search", {})
+        self.assertEqual(core.CREDENTIAL_ERRORS, set())
+
+    def test_one_gate_wakes_per_server_in_the_quiet_time(self):
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(core, "CACHE", tmp):
+            self.assertTrue(core.claim_credential_wake("asana"))
+            self.assertFalse(core.claim_credential_wake("asana"))
+            self.assertTrue(core.claim_credential_wake("intercom"))
+            with mock.patch("time.time", return_value=core.time.time() + core.CREDENTIAL_QUIET + 1):
+                self.assertTrue(core.claim_credential_wake("asana"))
