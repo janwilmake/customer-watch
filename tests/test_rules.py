@@ -28,6 +28,17 @@ def step(led, name):
     return next(s for s in nextstep.contact_steps(led, NOW) if s["contact"] == name)
 
 
+class Drafts(unittest.TestCase):
+    def test_a_draft_with_older_keys_shows_who_what_and_where(self):
+        d = {"to": "Jo", "what": "reply on the export", "where": "https://example.com/c/1", "sent": False}
+        self.assertEqual(note.drafts({"drafts": [d]}), [d])
+        self.assertEqual(note.draft_line(d), ("Jo", "reply on the export · https://example.com/c/1"))
+
+    def test_a_sent_draft_is_not_open_without_a_status(self):
+        led = {"drafts": [{"to": "Jo", "sent": True}, {"to": "Ann", "sent_at": "2026-11-11T10:00:00Z"}]}
+        self.assertEqual(note.drafts(led), [])
+
+
 class Late(unittest.TestCase):
     def test_a_fix_left_untold_keeps_its_own_deadline_when_the_reply_limit_grows(self):
         led = {"wishes": [{"name": "export-fix", "status": "shipped", "shipped_at": "2026-11-10T09:00:00Z",
