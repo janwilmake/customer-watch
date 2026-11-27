@@ -380,3 +380,58 @@ class LinearTickets(unittest.TestCase):
         self.assertIn("date unknown, not told", late)
         led["wishes"][0].update({"told_at": "2026-11-12T10:00:00Z", "told_by": "not needed"})
         self.assertNotIn("old-fix", " ".join(note.late_items(led, core.now())))
+
+
+class Topics(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.home = self.tmp.name
+        os.makedirs(os.path.join(self.home, "customers", "acme"))
+        core.save(os.path.join(self.home, "customers", "acme", "ledger.json"), {"wishes": [
+            {"name": "campaign-pause", "status": "open", "priority": "must-have", "words": "We need to pause a campaign.",
+             "date": "2026-11-01", "source": "https://example.com/c/1", "reporter": "Jo"},
+            {"name": "csv-export", "status": "open", "words": "An export would help."}]})
+        self.patches = [mock.patch.object(core, "HOME", self.home), mock.patch.object(core, "CACHE", os.path.join(self.home, "cache"))]
+        for p in self.patches:
+            p.start()
+        sys.modules.setdefault("core", core)
+        import topic
+        self.topic = topic
+        topic.HOME = self.home
+        os.makedirs(topic.topic_dir("outreach"))
+        core.save(os.path.join(topic.topic_dir("outreach"), "topic.json"), {"name": "outreach", "owner": "s-1", "wishes": []})
+
+    def tearDown(self):
+        for p in self.patches:
+            p.stop()
+        self.tmp.cleanup()
+
+    def test_statements_are_added_once_and_counted_per_wish(self):
+        rows = [{"customer": "acme", "quote": "Pausing  a campaign is a must.", "wish": "campaign-pause", "kind": "wish"}]
+        self.assertEqual(len(self.topic.add("outreach", rows)), 1)
+        self.assertEqual(self.topic.add("outreach", rows), [])  # a repeat is dropped
+        self.assertEqual(len(self.topic.backfill("outreach", "campaign")), 1)  # only the matching ledger wish
+        top = self.topic.stats("outreach")[0]
+        self.assertEqual((top["wish"], top["customers"], top["statements"], top["must_have_for"]), ("campaign-pause", 1, 2, 1))
+
+    def test_a_wish_the_topic_owns_waits_for_the_topic_not_for_the_customer_session(self):
+        led = core.load(os.path.join(self.home, "customers", "acme", "ledger.json"), {})
+        led["wishes"][0]["date"] = "2026-10-01"  # a must-have older than two weeks: late
+        self.assertIn("campaign-pause", " ".join(note.late_items(led, core.now())))
+        core.save(os.path.join(self.topic.topic_dir("outreach"), "topic.json"),
+                  {"name": "outreach", "owner": "s-1", "wishes": ["campaign-pause"]})
+        self.assertNotIn("campaign-pause", " ".join(note.late_items(led, core.now())))
+        team, _ = note.delegations(led, core.now())
+        self.assertEqual([t for _, t in team], ["campaign-pause (topic outreach)"])
+
+    def test_the_topic_gate_wakes_for_a_batch_after_a_quiet_time(self):
+        import gate
+        self.topic.add("outreach", [{"customer": "acme", "quote": "One.", "wish": "campaign-pause"}])
+        st, ctx = {"cursor": {}, "baselined": True}, {"watch": {"topic": "outreach"}}
+        self.assertEqual(gate.probe_feedback(st, [], ctx), [])  # just added: wait for more
+        later = core.now() + dt.timedelta(seconds=gate.BATCH_QUIET + 1)
+        with mock.patch.object(core, "now", return_value=later):
+            hits = gate.probe_feedback(st, [], ctx)
+        self.assertEqual([(h[0], h[1]) for h in hits], [("acme", "feedback")])
+        with mock.patch.object(core, "now", return_value=later):
+            self.assertEqual(gate.probe_feedback(st, [], ctx), [])  # read once

@@ -123,9 +123,15 @@ def delegated(item):
 def delegations(ledger, now):
     """(waiting for team, late again): a handed-over item counts for the team until the teammate is late."""
     team, late = [], []
+    owned = {w: n for n, t in core.topics().items() if t.get("owner") for w in t.get("wishes") or []}
     for kind in ("conversations", "promises", "wishes"):
         for item in ledger.get(kind, []):
             d = delegated(item)
+            topic = kind == "wishes" and item.get("status") == "open" and core.topic_of_wish(item.get("name"), owned)
+            if not d and topic:
+                # The topic's session owns this wish, and its own note counts it; it never turns late here.
+                team.append((item, f"{label(item)} (topic {topic})"))
+                continue
             if not d:
                 continue
             days = working_hours(parse(d["since"]), now) / 24

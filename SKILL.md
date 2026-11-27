@@ -1,6 +1,6 @@
 ---
 name: customer-watch
-description: Watch one or more customers in this session — every email, chat, ticket, meeting and call between their people and your team, from your own system of record (an adapter), Intercom and Slack — and keep this session's Roost note, Late badge and personal trust moves current. Every draft it makes carries the next best personal step (a visit, a meeting, a call), and it proposes calls with notes. A shell gate finds new items within about a minute with no model call, and a full tick runs every 6 hours. It drafts, but never sends. Use when the user says "/customer-watch <name> [<name>…]", "/customer-watch rest" (every customer without a watcher of its own), "watch <customer>", "customer-watch status", "trust count" or "stop watching".
+description: Watch one or more customers in this session — every email, chat, ticket, meeting and call between their people and your team, from your own system of record (an adapter), Intercom and Slack — and keep this session's Roost note, Late badge and personal trust moves current. Every draft it makes carries the next best personal step (a visit, a meeting, a call), and it proposes calls with notes. A shell gate finds new items within about a minute with no model call, and a full tick runs every 6 hours. It drafts, but never sends. Use when the user says "/customer-watch <name> [<name>…]", "/customer-watch rest" (every customer without a watcher of its own), "/customer-watch topic <topic>" (what every customer says about one topic), "watch <customer>", "customer-watch status", "trust count" or "stop watching".
 ---
 
 # customer-watch
@@ -90,6 +90,49 @@ On Start and on every full tick, for each listed connector:
    holds every open item of the backfill.
 6. Run `python3 note.py <session-id> --post`. With Roost, set the title (`Watch: <names>`) and the picture (below).
 7. Arm the gate (below).
+
+## Topic watch
+
+`/customer-watch topic <topic>`: one session owns one topic (for example outreach) for every
+customer. Customer sessions read all communication and own every message to a customer; the topic
+session owns what customers want in its topic: the wishes, their order, the tickets, the summary.
+
+### Statements
+
+A customer session adds what a customer says about the topic, never the whole message:
+`[{"customer": "<slug>", "contact": "<name>", "quote": "<their words, one or two sentences>",
+"kind": "wish | bug | praise | objection | question | other", "wish": "<wish name or null>",
+"source": "<link to the message>", "at": "ISO"}]` to `topic.py add <topic> -`. Repeats are dropped.
+No phone numbers, no addresses. One message can give statements to more than one topic.
+
+### Start
+
+1. `python3 topic.py init <topic> "<what belongs: one or two lines, and what does not>" <session-id>`.
+2. `python3 topic.py backfill <topic> "<regex>"`: the words of every ledger wish that matches. For
+   older history, use subagents that read transcripts and return statements only (the format
+   above), so no transcript enters this session.
+3. `python3 topic.py claim <topic> <wish>…` for the wishes this topic owns: customer sessions hand
+   them over, and only this session counts them.
+4. Write `<home>/topics/<topic>/summary.md` (below) from `python3 topic.py stats <topic>`.
+5. Write `watch.json`: `{"topic": "<topic>"}`. Post the note (below), then arm the gate.
+
+### Tick
+
+The gate wakes only for new statements, after 10 quiet minutes (at most 30), with one `NEW` line
+per statement (`"channel": "feedback"`). There is no timed tick.
+
+1. Put each statement under its wish (merge names that mean the same; claim a new wish of the topic).
+2. Update `summary.md`: per wish, what customers want and why, how many customers and which
+   (must-have for whom), the strongest quotes with their source links, the ticket and its status,
+   and the open questions. Keep it under 800 words; it is the topic's memory.
+3. Turn a wish that is ready into work: a ticket or a task (your adapter's or tracker's rules).
+   Write the ticket into every ledger wish with that name (`"ticket": "<id>"`), so the release
+   reaches each customer session.
+4. To ask or tell a customer something: `python3 topic.py who <slug>`, then SendMessage to that
+   session what to ask or tell, and why. It drafts and sends as it always does. Never write to a
+   customer from the topic session.
+5. Post the note: `About: <topic> for N customers.`, then `Waiting for you:` the decisions the user
+   must take (an order, a scope), then the top five wishes with their customer counts.
 
 ## Roster session
 
@@ -189,6 +232,12 @@ Runs on every gate exit.
 4. Update the ledger: conversations (who has the ball), promises, wishes, meetings,
    `last_contact_at`, `last_message`, new contacts (add their match keys, so the gate finds them
    next time).
+   **Topics** (`python3 topic.py list`, once per tick): when a `NEW` item says something about a
+   topic, add each statement with `topic.py add <topic> -` (see Topic watch → Statements). A wish
+   that a topic owns is that topic's work: record what the customer said, and do not decide, ticket
+   or promise anything about it. You still own every message to and from the customer. When the
+   customer waits for an answer that only the topic can give, set the conversation `delegated`
+   (`"to": "topic:<topic>"`) and SendMessage the question to `topic.py owner <topic>`.
 5. **Task adapter** (such as `adapters/asana`) in `config.json`: on every tick, not only on a full
    tick, follow its `ADAPTER.md` Tick: push the open items that have no task yet, then sync both
    ways. The note shows "Not on the task board yet: N" while an item has no task.

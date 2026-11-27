@@ -85,6 +85,27 @@ def roost(path=""):
     return base.rstrip("/") + "/api/sessions" + (f"/{path}" if path else "") if base else None
 
 
+def topics():
+    """Every topic: {name: topic.json}. A topic with an owner session owns the wishes it lists."""
+    import glob
+    out = {}
+    for path in glob.glob(os.path.join(HOME, "topics", "*", "topic.json")):
+        t = load(path, {})
+        out[t.get("name") or os.path.basename(os.path.dirname(path))] = t
+    return out
+
+
+def topic_of_wish(name, cache=None):
+    """The topic that owns a wish, or None. Only a topic with an owner session takes a wish over."""
+    owned = cache if cache is not None else {w: n for n, t in topics().items() if t.get("owner") for w in t.get("wishes") or []}
+    return owned.get(name)
+
+
+def ledger_paths():
+    import glob
+    return sorted(glob.glob(os.path.join(HOME, "customers", "*", "ledger.json")))
+
+
 def ledger_path(slug):
     return os.path.join(HOME, "customers", slug, "ledger.json")
 
@@ -154,6 +175,14 @@ def now():
     if fixed:
         return dt.datetime.fromisoformat(fixed.replace("Z", "+00:00"))
     return dt.datetime.now(dt.timezone.utc)
+
+
+def parse_iso(value):
+    """Epoch seconds of an ISO time, or 0."""
+    try:
+        return dt.datetime.fromisoformat(str(value).replace("Z", "+00:00")).timestamp()
+    except ValueError:
+        return 0
 
 
 def iso(t):

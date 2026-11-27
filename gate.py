@@ -204,6 +204,29 @@ def probe_watch(st, customers, ctx):
             for d in core.down_watches(ctx["session"])]
 
 
+BATCH_QUIET = 10 * 60   # a topic gate waits for this quiet after the newest statement, so one turn takes a batch
+BATCH_MAX = 30 * 60     # but never longer than this after the oldest unread one
+
+
+def probe_feedback(st, customers, ctx):
+    """New statements about this session's topic, in batches (topic.py add writes them)."""
+    import topic
+    rows = topic.statements(ctx["watch"]["topic"])
+    if not st.get("baselined"):
+        st["cursor"]["feedback"] = len(rows)  # the topic's start reads what exists through topic.py stats
+        return []
+    done = st["cursor"].get("feedback", 0)
+    fresh = rows[done:]
+    if not fresh:
+        return []
+    clock = core.now().timestamp()
+    ages = [clock - core.parse_iso(r.get("added_at")) for r in fresh]
+    if min(ages) < BATCH_QUIET and max(ages) < BATCH_MAX:
+        return []
+    st["cursor"]["feedback"] = len(rows)
+    return [(r["customer"], "feedback", r["id"], r) for r in fresh]
+
+
 def render_note(session):
     subprocess.run([sys.executable, os.path.join(SKILL, "note.py"), session, "--post"],
                    capture_output=True, timeout=60)
@@ -237,6 +260,10 @@ def main():
     fast += [p for m in mods for p in getattr(m, "FAST_PROBES", [])]
     slow = [probe_releases] + [p for m in mods for p in getattr(m, "SLOW_PROBES", [])]
     ctx = {"session": session, "watch": watch}
+    topic_mode = bool(watch.get("topic"))
+    if topic_mode:
+        # A topic session reads statements only, and wakes only when new ones arrive: no timed ticks.
+        fast, slow = [probe_feedback, probe_watch], []
 
     state_path = os.path.join(sdir, "state.json")
     st = load(state_path, {})
@@ -248,10 +275,10 @@ def main():
     st.setdefault("last_note", 0)
     seen = set(st["seen"])
     began = time.time()
-    print(f"customer-watch gate: {', '.join(watch['slugs'])}; probe every {FAST_EVERY}s", flush=True)
+    print(f"customer-watch gate: {('topic ' + watch['topic']) if topic_mode else ', '.join(watch['slugs'])}; probe every {FAST_EVERY}s", flush=True)
 
     while True:
-        customers = [core.Customer(s, load(core.ledger_path(s), {})) for s in watch["slugs"]]
+        customers = [core.Customer(s, load(core.ledger_path(s), {})) for s in watch.get("slugs", [])]
         probes = list(fast)
         if time.time() - st["last_slow"] >= SLOW_EVERY:
             probes += slow
@@ -278,9 +305,9 @@ def main():
             reason = f"{len(new)} new item(s)" + (f"; credential error: {', '.join(expired)}" if expired else "")
         elif expired:
             reason = f"credential error: {', '.join(expired)}"
-        elif roster_due(watch):
+        elif not topic_mode and roster_due(watch):
             reason = "roster due (daily)"
-        elif time.time() - st["last_full"] >= FULL_EVERY:
+        elif not topic_mode and time.time() - st["last_full"] >= FULL_EVERY:
             reason = f"full tick due ({FULL_EVERY / 3600:g} h)"
         elif mode == "--once":
             reason = "nothing new"
@@ -312,7 +339,8 @@ def main():
                     pass
             return
         if time.time() - st["last_note"] >= NOTE_EVERY:
-            render_note(session)
+            if not topic_mode:
+                render_note(session)
             st["last_note"] = time.time()
         time.sleep(FAST_EVERY)
 
